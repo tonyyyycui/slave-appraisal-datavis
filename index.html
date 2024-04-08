@@ -5,16 +5,74 @@
     <title>Data Visualization</title>
     <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
-
-    <div class = "title-box">
-        <p class = "title-text"> 
-            US Slave Appraisals Across Time
+    <div class="title-box">
+        <p class="title-text"> 
+            US Slave Appraisals in 1860
         </p>
     </div>
 
-    <div>graph</div>
+    <!-- Create a container for the graph -->
+    <div id="container"></div>
 
+    <!-- Load D3.js -->
+    <script type="module">
+        import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
+
+        // Declare the chart dimensions and margins.
+        const width = 640;
+        const height = 400;
+        const marginTop = 20;
+        const marginRight = 20;
+        const marginBottom = 30;
+        const marginLeft = 40;
+
+        // Create the SVG container.
+        const svg = d3.select("#container").append("svg")
+            .attr("width", width)
+            .attr("height", height);
+
+        // Read the CSV data.
+        d3.csv("berry-data.csv").then(data => {
+            // Filter data for the year 1860
+            const filteredData = data.filter(d => d['app.cpi.1860']);
+
+            // Parse the filtered data
+            filteredData.forEach(d => {
+                d.year = new Date(+d.year, 0, 1); // Parse year as date
+                d.appraisal1860 = +d['app.cpi.1860']; // Parse appraisal value for 1860
+            });
+
+            // Declare the x (horizontal position) scale.
+            const x = d3.scaleUtc()
+                .domain(d3.extent(filteredData, d => d.year))
+                .range([marginLeft, width - marginRight]);
+
+            // Declare the y (vertical position) scale.
+            const y = d3.scaleLinear()
+                .domain([0, d3.max(filteredData, d => d.appraisal1860)])
+                .range([height - marginBottom, marginTop]);
+
+            // Add the x-axis.
+            svg.append("g")
+                .attr("transform", `translate(0,${height - marginBottom})`)
+                .call(d3.axisBottom(x));
+
+            // Add the y-axis.
+            svg.append("g")
+                .attr("transform", `translate(${marginLeft},0)`)
+                .call(d3.axisLeft(y));
+
+            // Plot the data points.
+            svg.selectAll("circle")
+                .data(filteredData)
+                .enter().append("circle")
+                .attr("cx", d => x(d.year))
+                .attr("cy", d => y(d.appraisal1860))
+                .attr("r", 5);
+        }).catch(error => {
+            console.log("Error loading data:", error);
+        });
+    </script>
 </body>
 </html>
