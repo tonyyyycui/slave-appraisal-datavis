@@ -4,72 +4,162 @@
     <meta charset="utf-8">
     <title>Data Visualization</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        .tooltip {
+            position: absolute;
+            background-color: white;
+            border: 1px solid black;
+            padding: 5px;
+            display: none;
+        }
+    </style>
 </head>
 <body>
     <div class="title-box">
         <p class="title-text"> 
-            US Slave Appraisals in 1860
+            US Slave Appraisals
         </p>
     </div>
 
     <!-- Create a container for the graph -->
     <div id="container"></div>
 
+    <!-- Create toggle switch -->
+    <label class="switch">
+        <input id="toggle" type="checkbox">
+        <span class="slider"></span>
+    </label>
+    <span id="toggle-label">Use CPI in 2014</span>
+
+    <!-- Add buttons for filtering by age -->
+    <button onclick="filterByAge(0, 10)">Filter by Age 0-10</button>
+    <button onclick="filterByAge(11, 22)">Filter by Age 11-22</button>
+    <button onclick="filterByAge(23, 39)">Filter by Age 23-39</button>
+    <button onclick="filterByAge(40, 100)">Filter by Age 40+</button>
+
+    <div class="title-box">
+        <p style="text-align: center; font-weight: bold;">
+            Berry Slave Value Database
+        </p>
+    </div>
+
+    <div class="tooltip" id="tooltip"></div>
+
     <!-- Load D3.js -->
-    <script type="module">
-        import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+    
+    <!-- Load custom JavaScript -->
+    <script>
+        // Function to filter data by age
+        function filterByAge(minAge, maxAge) {
+            const filteredData = data.filter(d => {
+                const age = parseFloat(d.age);
+                return age >= minAge && age <= maxAge;
+            });
+            updateData(filteredData);
+        }
 
         // Declare the chart dimensions and margins.
-        const width = 640;
-        const height = 400;
-        const marginTop = 20;
-        const marginRight = 20;
-        const marginBottom = 30;
-        const marginLeft = 40;
+        const width = 800;
+        const height = 600; // Increased size
+        const marginTop = 50; // Adjusted margins
+        const marginRight = 50;
+        const marginBottom = 100;
+        const marginLeft = 100;
 
         // Create the SVG container.
         const svg = d3.select("#container").append("svg")
             .attr("width", width)
             .attr("height", height);
 
-        // Read the CSV data.
-        d3.csv("berry-data.csv").then(data => {
-            // Filter data for the year 1860
-            const filteredData = data.filter(d => d['app.cpi.1860']);
+        // Function to update data and redraw the graph
+        function updateData(filteredData) {
+            // Remove existing SVG elements
+            svg.selectAll("*").remove();
 
-            // Parse the filtered data
-            filteredData.forEach(d => {
-                d.year = new Date(+d.year, 0, 1); // Parse year as date
-                d.appraisal1860 = +d['app.cpi.1860']; // Parse appraisal value for 1860
-            });
+            // Calculate the new width and height of the chart area
+            const chartWidth = width - marginLeft - marginRight;
+            const chartHeight = height - marginTop - marginBottom;
 
-            // Declare the x (horizontal position) scale.
-            const x = d3.scaleUtc()
+            // Create x scale
+            const x = d3.scaleTime()
                 .domain(d3.extent(filteredData, d => d.year))
-                .range([marginLeft, width - marginRight]);
+                .range([0, chartWidth]);
 
-            // Declare the y (vertical position) scale.
+            // Create y scale
             const y = d3.scaleLinear()
-                .domain([0, d3.max(filteredData, d => d.appraisal1860)])
-                .range([height - marginBottom, marginTop]);
+                .domain([0, d3.max(filteredData, d => d.appraisal)])
+                .range([chartHeight, 0]);
 
-            // Add the x-axis.
-            svg.append("g")
-                .attr("transform", `translate(0,${height - marginBottom})`)
-                .call(d3.axisBottom(x));
+            // Append SVG container for the chart area
+            const chart = svg.append("g")
+                .attr("transform", `translate(${marginLeft},${marginTop})`);
 
-            // Add the y-axis.
-            svg.append("g")
-                .attr("transform", `translate(${marginLeft},0)`)
+            // Add x-axis
+            chart.append("g")
+                .attr("class", "x-axis")
+                .attr("transform", `translate(0,${chartHeight})`)
+                .call(d3.axisBottom(x).ticks(5));
+
+            // Add x-axis label
+            chart.append("text")
+                .attr("class", "x-axis-label")
+                .attr("text-anchor", "middle")
+                .attr("x", chartWidth / 2)
+                .attr("y", chartHeight + 40) // Adjusted position
+                .text("Year");
+
+            // Add y-axis
+            chart.append("g")
+                .attr("class", "y-axis")
                 .call(d3.axisLeft(y));
 
-            // Plot the data points.
-            svg.selectAll("circle")
+            // Add y-axis label
+            chart.append("text")
+                .attr("class", "y-axis-label")
+                .attr("text-anchor", "middle")
+                .attr("transform", "rotate(-90)")
+                .attr("x", -chartHeight / 2)
+                .attr("y", -60) // Adjusted position
+                .text("CPI");
+
+            // Plot the data points
+            chart.selectAll("circle")
                 .data(filteredData)
                 .enter().append("circle")
-                .attr("cx", d => x(d.year))
-                .attr("cy", d => y(d.appraisal1860))
-                .attr("r", 5);
+                .attr("cx", d => x(d.year)) // Correctly assign x-values based on the date scale
+                .attr("cy", d => y(d.appraisal))
+                .attr("r", 5)
+                .on("click", function(d) {
+                    showTooltip(d);
+                });
+        }
+
+        // Function to show tooltip
+        function showTooltip(data) {
+            const tooltip = document.getElementById('tooltip');
+            tooltip.innerHTML = `Name: ${data.name}<br>Age: ${data.age}<br>State: ${data.state}`;
+            tooltip.style.display = 'block';
+            tooltip.style.left = (d3.event.pageX + 10) + 'px';
+            tooltip.style.top = (d3.event.pageY - 10) + 'px';
+        }
+
+        // Read the CSV data.
+        let data;
+
+        // Fetch data
+        d3.csv("berry-data.csv").then(csvData => {
+            data = csvData;
+            data.forEach(d => {
+                d.year = new Date(+d.year, 0, 1); // Parse year as date
+                d.appraisal = +d['app.cpi.2014']; // Parse appraisal value
+            });
+            updateData(data); // Initial draw with default data
+
+            // Add event listener to toggle switch
+            document.getElementById('toggle').addEventListener('change', function() {
+                updateData(data);
+            });
         }).catch(error => {
             console.log("Error loading data:", error);
         });

@@ -5,7 +5,7 @@ body {
   font-family: "Helvetica Neue", Helvetica, sans-serif;
 }
 .title-box {
-  border: 1px solid #ccc;
+  border: 3px solid #ccc;
   padding: 10px;
   background-color: #f0f0f0;
   width: 80%; /* Adjust the width as needed */
@@ -15,6 +15,17 @@ body {
 .title-text {
   font-size: 16px;
   margin:0; /* Adjust the font size as needed */
+}
+
+.bottom-box {
+    border: 3px solid #ccc;
+    padding: 10px;
+    background-color: #f0f0f0;
+    width: 80%; /* Adjust the width as needed */
+    display: inline-block;
+    height: 50px; /* Adjust the height as needed */
+    margin: 0 auto; /* Center the box horizontally */
+
 }
 
 .toggle-switch {
