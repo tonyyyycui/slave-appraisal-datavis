@@ -97,3 +97,22 @@ input:checked + .slider:before {
 .slider.round:before {
   border-radius: 50%;
 }
+
+.tooltip {
+  position: absolute;
+  background-color: white;
+  border: 1px solid black;
+  padding: 5px;
+  display: none;
+  bottom: 20px; /* Adjust this value to change the distance from the bottom */
+}
+
+.github-logo {
+  /* text-align: right; */
+  display: block;
+  margin: auto;
+  max-width: 25px;
+  max-height: 25px;
+  cursor: pointer;
+  margin-left: 20px;
+}
