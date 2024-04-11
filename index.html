@@ -130,18 +130,26 @@
                 .attr("cx", d => x(d.year)) // Correctly assign x-values based on the date scale
                 .attr("cy", d => y(d.appraisal))
                 .attr("r", 5)
-                .on("click", function(d) {
+                .on("mouseover", function(event, d) {
                     showTooltip(d);
+                })
+                .on("mouseout", function() {
+                    hideTooltip();
                 });
         }
 
         // Function to show tooltip
         function showTooltip(data) {
+            // console.log('persons name:', data.year)
             const tooltip = document.getElementById('tooltip');
-            tooltip.innerHTML = `Name: ${data.name}<br>Age: ${data.age}<br>State: ${data.state}`;
+            tooltip.innerHTML = `Name: ${data.name}<br>Age: ${data.age}<br>Sex: ${data.sex}<br>State: ${data.state}`;
             tooltip.style.display = 'block';
-            tooltip.style.left = (d3.event.pageX + 10) + 'px';
-            tooltip.style.top = (d3.event.pageY - 10) + 'px';
+        }
+
+        // Function to hide tooltip
+        function hideTooltip() {
+            const tooltip = document.getElementById('tooltip');
+            tooltip.style.display = 'none';
         }
 
         // Read the CSV data.
@@ -153,6 +161,12 @@
             data.forEach(d => {
                 d.year = new Date(+d.year, 0, 1); // Parse year as date
                 d.appraisal = +d['app.cpi.2014']; // Parse appraisal value
+                d.name = d['name']; // Parse name field
+                 d.age = +d['age']; // Parse age field
+                 d.sex = d['sex']; // Parse sex field
+                d.state = d['state']; // Parse state field
+
+
             });
             updateData(data); // Initial draw with default data
 
