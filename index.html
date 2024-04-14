@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8">
     <title>Data Visualization</title>
     <link rel="stylesheet" href="style.css">
     <style>
+        /* Styling for tooltips */
         .tooltip {
             position: absolute;
             background-color: white;
@@ -12,11 +14,48 @@
             padding: 5px;
             display: none;
         }
+
+        /* Styling for title boxes */
+        .title-box {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 10px;
+            background-color: #f0f0f0;
+            margin: 0;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* Styling for the filter boxes */
+        .filter-box {
+            border: 1px solid black;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        /* Container for the entire main content area */
+        .main-content {
+            display: flex;
+        }
+
+        /* Styling for the graph container */
+        .graph-container {
+            flex: 3; /* Takes up three times the space of the summary box */
+            margin-right: 20px;
+        }
+
+        /* Styling for the right-hand summary box */
+        .summary-box {
+            flex: 1; /* Takes up one-third the width of the main content */
+            padding: 10px;
+            border: 1px solid black;
+        }
     </style>
 </head>
+
 <body>
     <div class="title-box">
-        <p class="title-text"> 
+        <p class="title-text">
             US Slave Appraisals
             <a href="https://github.com/tonyyyycui/slave-appraisal-datavis">
                 <svg class="github-logo" viewBox="0 0 16 16" version="1.1" width="18" height="18" aria-hidden="true">
@@ -29,58 +68,70 @@
         </div>
     </div>
 
+    <!-- Main content area with filters, graph, and summary box -->
+    <div class="main-content">
+        <!-- Left sidebar for filters -->
+        <div style="width: 20%;">
+            <!-- Filter by Age -->
+            <div class="filter-box">
+                <p style="font-weight: bold;">Filter by Age</p>
+                <button onclick="filterByAge(0, 10)">Age 0-10</button>
+                <button onclick="filterByAge(11, 22)">Age 11-22</button>
+                <button onclick="filterByAge(23, 39)">Age 23-39</button>
+                <button onclick="filterByAge(40, 100)">Age 40+</button>
+            </div>
 
-    <!-- Create a container for the graph -->
-    <div id="container"></div>
+            <!-- Filter by State -->
+            <div class="filter-box">
+                <p style="font-weight: bold;">Filter by State</p>
+                <button onclick="filterByState('NC')">NC</button>
+                <button onclick="filterByState('GA')">GA</button>
+                <button onclick="filterByState('TX')">TX</button>
+                <button onclick="filterByState('TN')">TN</button>
+                <button onclick="filterByState('LA')">LA</button>
+                <button onclick="filterByState('AL')">AL</button>
+                <button onclick="filterByState('VA')">VA</button>
+                <button onclick="filterByState('MS')">MS</button>
+                <button onclick="filterByState('unspecified')">Unspecified</button>
+            </div>
 
-    <!-- Create toggle switch
-    <label class="switch">
-        <input id="toggle" type="checkbox">
-        <span class="slider"></span>
-    </label>
-    <span id="toggle-label">Use CPI in 2014</span> -->
+            <!-- Filter by Gender -->
+            <div class="filter-box">
+                <p style="font-weight: bold;">Filter by Gender</p>
+                <button onclick="filterByGender('male')">Male</button>
+                <button onclick="filterByGender('female')">Female</button>
+            </div>
 
-    <!-- Add buttons for filtering by age -->
-    <button onclick="filterByAge(0, 10)">Filter by Age 0-10</button>
-    <button onclick="filterByAge(11, 22)">Filter by Age 11-22</button>
-    <button onclick="filterByAge(23, 39)">Filter by Age 23-39</button>
-    <button onclick="filterByAge(40, 100)">Filter by Age 40+</button>
+            <!-- Filter by Year -->
+            <div class="filter-box">
+                <p style="font-weight: bold;">Filter by Year</p>
+                <label for="start-year">Start Year:</label>
+                <input type="number" id="start-year" placeholder="YYYY" />
 
-     <!-- Add buttons for filtering by state -->
-     <div id="state-buttons">
-        <button onclick="filterByState('NC')">NC</button>
-        <button onclick="filterByState('GA')">GA</button>
-        <button onclick="filterByState('TX')">TX</button>
-        <button onclick="filterByState('TN')">TN</button>
-        <button onclick="filterByState('LA')">LA</button>
-        <button onclick="filterByState('AL')">AL</button>
-        <button onclick="filterByState('VA')">VA</button>
-        <button onclick="filterByState('MS')">MS</button>
-        <button onclick="filterByState('unspecified')">Unspecified</button>
+                <label for="end-year">End Year:</label>
+                <input type="number" id="end-year" placeholder="YYYY" />
 
+                <button onclick="filterByYear()">Filter by Years</button>
+            </div>
+        </div>
+
+        <!-- Graph container -->
+        <div class="graph-container">
+            <div id="container"></div> <!-- Graph container -->
+        </div>
+
+        <!-- Summary box -->
+        <div class="summary-box">
+            <p id="range-value">Range: </p>
+            <p id="iqr-value">IQR: </p>
+            <p id="median-value">Median: </p>
+            <p id="mean-value">Mean: </p>
+            <p id="observations-value">Number of Observations: </p>
+        </div>
     </div>
-
-      <!-- Add buttons for filtering by gender -->
-      <div id="gender-buttons">
-        <button onclick="filterByGender('male')">Male</button>
-        <button onclick="filterByGender('female')">Female</button>
-    </div>
-
-      <!-- Input fields for filtering data by year -->
-      <div id="year-filter">
-        <label for="start-year">Start Year:</label>
-        <input type="number" id="start-year" placeholder="YYYY" />
-
-        <label for="end-year">End Year:</label>
-        <input type="number" id="end-year" placeholder="YYYY" />
-
-        <button onclick="filterByYear()">Filter by Years</button>
-    </div>
-
-    
 
     <div class="title-box">
-        <p style="text-align: center; font-weight: bold;">
+        <p style="text-align: center; width: 100%; font-weight: bold;">
             Berry Slave Value Database
         </p>
     </div>
@@ -89,10 +140,40 @@
 
     <!-- Load D3.js -->
     <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
-    
+
     <!-- Load custom JavaScript -->
     <script>
 
+
+// Function to calculate summary statistics
+function calculateSummaryStatistics(filteredData) {
+    // Calculate range
+    const minValue = d3.min(filteredData, d => d.appraisal);
+    const maxValue = d3.max(filteredData, d => d.appraisal);
+    const range = maxValue - minValue;
+    
+    // Calculate IQR (interquartile range)
+    const q1 = d3.quantile(filteredData.map(d => d.appraisal).sort(d3.ascending), 0.25);
+    const q3 = d3.quantile(filteredData.map(d => d.appraisal).sort(d3.ascending), 0.75);
+    const iqr = q3 - q1;
+    
+    // Calculate median
+    const median = d3.median(filteredData, d => d.appraisal);
+    
+    // Calculate mean
+    const mean = d3.mean(filteredData, d => d.appraisal);
+    
+    // Calculate number of observations
+    const numberOfObservations = filteredData.length;
+    
+    return {
+        range,
+        iqr,
+        median,
+        mean,
+        numberOfObservations
+    };
+}
 function filterByState(state) {
             let filteredData;
             
@@ -115,7 +196,7 @@ function filterByYear() {
 
     // Check if the input years are valid integers and start year is less than or equal to end year
     if (isNaN(startYear) || isNaN(endYear) || startYear > endYear) {
-        alert("Please provide a valid year range where start year is less than or equal to end year.");
+        alert("Please provide a valid year range.");
         return;
     }
 
@@ -162,71 +243,112 @@ function filterByYear() {
             .attr("width", width)
             .attr("height", height);
 
-        // Function to update data and redraw the graph
-        function updateData(filteredData) {
-            // Remove existing SVG elements
-            svg.selectAll("*").remove();
+            function updateData(filteredData) {
+    // Remove existing SVG elements
+    svg.selectAll("*").remove();
 
-            // Calculate the new width and height of the chart area
-            const chartWidth = width - marginLeft - marginRight;
-            const chartHeight = height - marginTop - marginBottom;
+    // Calculate the new width and height of the chart area
+    const chartWidth = width - marginLeft - marginRight;
+    const chartHeight = height - marginTop - marginBottom;
 
-            // Create x scale
-            const x = d3.scaleTime()
-                .domain(d3.extent(filteredData, d => d.year))
-                .range([0, chartWidth]);
+    // Calculate summary statistics for the filtered data
+    const stats = calculateSummaryStatistics(filteredData);
+    // Display the calculated statistics
+    updateStatisticsDisplay(stats);
 
-            // Create y scale
-            const y = d3.scaleLinear()
-                .domain([0, d3.max(filteredData, d => d.appraisal)])
-                .range([chartHeight, 0]);
+    // Create x scale
+    const x = d3.scaleTime()
+        .domain(d3.extent(filteredData, d => d.year))
+        .range([0, chartWidth]);
 
-            // Append SVG container for the chart area
-            const chart = svg.append("g")
-                .attr("transform", `translate(${marginLeft},${marginTop})`);
+    // Create y scale
+    const y = d3.scaleLinear()
+        .domain([0, d3.max(filteredData, d => d.appraisal)])
+        .range([chartHeight, 0]);
 
-            // Add x-axis
-            chart.append("g")
-                .attr("class", "x-axis")
-                .attr("transform", `translate(0,${chartHeight})`)
-                .call(d3.axisBottom(x).ticks(5));
+    // Append SVG container for the chart area
+    const chart = svg.append("g")
+        .attr("transform", `translate(${marginLeft},${marginTop})`);
 
-            // Add x-axis label
-            chart.append("text")
-                .attr("class", "x-axis-label")
-                .attr("text-anchor", "middle")
-                .attr("x", chartWidth / 2)
-                .attr("y", chartHeight + 40) // Adjusted position
-                .text("Year");
+    // Add x-axis with transition
+    const xAxis = d3.axisBottom(x).ticks(5);
+    chart.append("g")
+        .attr("class", "x-axis")
+        .attr("transform", `translate(0,${chartHeight})`)
+        .transition()
+        .duration(750) // 750ms transition duration
+        .call(xAxis);
 
-            // Add y-axis
-            chart.append("g")
-                .attr("class", "y-axis")
-                .call(d3.axisLeft(y));
+    // Add y-axis with transition
+    const yAxis = d3.axisLeft(y);
+    chart.append("g")
+        .attr("class", "y-axis")
+        .transition()
+        .duration(750) // 750ms transition duration
+        .call(yAxis);
 
-            // Add y-axis label
-            chart.append("text")
-                .attr("class", "y-axis-label")
-                .attr("text-anchor", "middle")
-                .attr("transform", "rotate(-90)")
-                .attr("x", -chartHeight / 2)
-                .attr("y", -60) // Adjusted position
-                .text("CPI");
+    // Add x-axis label
+    chart.append("text")
+        .attr("class", "x-axis-label")
+        .attr("text-anchor", "middle")
+        .attr("x", chartWidth / 2)
+        .attr("y", chartHeight + 40)
+        .text("Year");
 
-            // Plot the data points
-            chart.selectAll("circle")
-                .data(filteredData)
-                .enter().append("circle")
-                .attr("cx", d => x(d.year)) // Correctly assign x-values based on the date scale
-                .attr("cy", d => y(d.appraisal))
-                .attr("r", 5)
-                .on("mouseover", function(event, d) {
-                    showTooltip(d);
-                })
-                .on("mouseout", function() {
-                    hideTooltip();
-                });
-        }
+    // Add y-axis label
+    chart.append("text")
+        .attr("class", "y-axis-label")
+        .attr("text-anchor", "middle")
+        .attr("transform", "rotate(-90)")
+        .attr("x", -chartHeight / 2)
+        .attr("y", -60)
+        .text("CPI");
+
+    // Bind the filtered data
+    const circles = chart.selectAll("circle")
+        .data(filteredData);
+
+    // Transition existing circles to their new positions
+    circles.transition()
+        .duration(750) // 750ms transition duration
+        .attr("cx", d => x(d.year))
+        .attr("cy", d => y(d.appraisal))
+        .attr("r", 5);
+
+    // Add new circles with transitions
+    circles.enter()
+        .append("circle")
+        .attr("cx", d => x(d.year))
+        .attr("cy", d => y(d.appraisal))
+        .attr("r", 5)
+        .on("mouseover", function(event, d) {
+            showTooltip(d);
+        })
+        .on("mouseout", function() {
+            hideTooltip();
+        })
+        .transition()
+        .duration(750) // 750ms transition duration
+        .attr("opacity", 1);
+
+    // Remove old circles with transition
+    circles.exit()
+        .transition()
+        .duration(750) // 750ms transition duration
+        .attr("opacity", 0)
+        .remove();
+}
+
+// Function to update the statistics display
+function updateStatisticsDisplay(stats) {
+    // Assuming you have HTML elements to display the statistics
+    document.getElementById('range-value').innerText = `Range: ${stats.range}`;
+    document.getElementById('iqr-value').innerText = `IQR: ${stats.iqr}`;
+    document.getElementById('median-value').innerText = `Median: ${stats.median}`;
+    document.getElementById('mean-value').innerText = `Mean: ${stats.mean}`;
+    document.getElementById('observations-value').innerText = `Number of Observations: ${stats.numberOfObservations}`;
+}
+
 
         function showTooltip(data) {
     const tooltip = document.getElementById('tooltip');
