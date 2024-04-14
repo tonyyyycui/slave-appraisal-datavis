@@ -46,6 +46,39 @@
     <button onclick="filterByAge(23, 39)">Filter by Age 23-39</button>
     <button onclick="filterByAge(40, 100)">Filter by Age 40+</button>
 
+     <!-- Add buttons for filtering by state -->
+     <div id="state-buttons">
+        <button onclick="filterByState('NC')">NC</button>
+        <button onclick="filterByState('GA')">GA</button>
+        <button onclick="filterByState('TX')">TX</button>
+        <button onclick="filterByState('TN')">TN</button>
+        <button onclick="filterByState('LA')">LA</button>
+        <button onclick="filterByState('AL')">AL</button>
+        <button onclick="filterByState('VA')">VA</button>
+        <button onclick="filterByState('MS')">MS</button>
+        <button onclick="filterByState('unspecified')">Unspecified</button>
+
+    </div>
+
+      <!-- Add buttons for filtering by gender -->
+      <div id="gender-buttons">
+        <button onclick="filterByGender('male')">Male</button>
+        <button onclick="filterByGender('female')">Female</button>
+    </div>
+
+      <!-- Input fields for filtering data by year -->
+      <div id="year-filter">
+        <label for="start-year">Start Year:</label>
+        <input type="number" id="start-year" placeholder="YYYY" />
+
+        <label for="end-year">End Year:</label>
+        <input type="number" id="end-year" placeholder="YYYY" />
+
+        <button onclick="filterByYear()">Filter by Years</button>
+    </div>
+
+    
+
     <div class="title-box">
         <p style="text-align: center; font-weight: bold;">
             Berry Slave Value Database
@@ -59,12 +92,60 @@
     
     <!-- Load custom JavaScript -->
     <script>
+
+function filterByState(state) {
+            let filteredData;
+            
+            if (state === 'unspecified') {
+                // Filter data where state is missing or unspecified
+                filteredData = data.filter(d => !d.state || d.state.trim() === '');
+            } else {
+                // Filter data based on the selected state
+                filteredData = data.filter(d => d.state === state);
+            }
+            
+            updateData(filteredData);
+        }
+
+         // Function to filter data by year range
+function filterByYear() {
+    // Get the start and end years from input fields
+    const startYear = parseInt(document.getElementById('start-year').value, 10);
+    const endYear = parseInt(document.getElementById('end-year').value, 10);
+
+    // Check if the input years are valid integers and start year is less than or equal to end year
+    if (isNaN(startYear) || isNaN(endYear) || startYear > endYear) {
+        alert("Please provide a valid year range where start year is less than or equal to end year.");
+        return;
+    }
+
+    // Convert start and end years to Date objects
+    const startDate = new Date(startYear, 0, 1); // January 1st of start year
+    const endDate = new Date(endYear, 11, 31); // December 31st of end year
+
+    // Filter data within the specified year range
+    const filteredData = data.filter(d => {
+        // Convert `d.year` to a Date object, if not already
+        const dataDate = new Date(d.year);
+        // Compare `dataDate` with `startDate` and `endDate`
+        return dataDate >= startDate && dataDate <= endDate;
+    });
+
+    // Update the graph with the filtered data
+    updateData(filteredData);
+}
         // Function to filter data by age
         function filterByAge(minAge, maxAge) {
             const filteredData = data.filter(d => {
                 const age = parseFloat(d.age);
                 return age >= minAge && age <= maxAge;
             });
+            updateData(filteredData);
+        }
+
+         // Function to filter data by gender
+         function filterByGender(gender) {
+            const filteredData = data.filter(d => d.sex === gender);
             updateData(filteredData);
         }
 

@@ -109,8 +109,8 @@ input:checked + .slider:before {
 
 .github-logo {
   /* text-align: right; */
-  display: block;
-  margin: auto;
+  /* display: block;
+  margin: auto; */
   max-width: 25px;
   max-height: 25px;
   cursor: pointer;
