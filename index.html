@@ -26,11 +26,30 @@
             justify-content: space-between;
         }
 
-        /* Styling for the filter boxes */
-        .filter-box {
+        /* Styling for the larger filter box */
+        .filter-container {
+            background-color: #f2e4f2;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        /* Styling for each filter box */
+        .filter-box,
+        .progress-box {
             border: 1px solid black;
             padding: 10px;
             margin-bottom: 10px;
+            background-color: #f2e4f2; /* Same background color as filter boxes */
+        }
+
+        /* Styling for filter titles */
+        .filter-title {
+            background-color: #f2a2c0;
+            padding: 5px;
+            margin: 0;
+            font-weight: bold;
+            border-bottom: 1px solid black;
+            text-align: center; /* This will center the text */
         }
 
         /* Container for the entire main content area */
@@ -50,13 +69,40 @@
             padding: 10px;
             border: 1px solid black;
         }
+
+        /* Styles for the progress bar */
+        #progress-bar {
+            width: 300px; /* Adjust width as needed */
+            height: 20px;
+            background-color: #e0e0e0; /* Light gray background */
+            border-radius: 10px; /* Rounded corners */
+            position: relative; /* Necessary for positioning */
+        }
+
+        #progress {
+            height: 100%; /* Full height */
+            background-color: #4caf50; /* Green color for progress */
+            border-radius: 10px 0 0 10px; /* Rounded corners on the left */
+            transition: width 0.5s; /* Smooth width transition */
+        }
+
+        /* Styles for the labels */
+        #label {
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        #percentage-label {
+            font-size: 14px;
+            margin-top: 5px;
+        }
     </style>
 </head>
 
 <body>
     <div class="title-box">
         <p class="title-text">
-            US Slave Appraisals
+            US Slave Appraisals Across Time
             <a href="https://github.com/tonyyyycui/slave-appraisal-datavis">
                 <svg class="github-logo" viewBox="0 0 16 16" version="1.1" width="18" height="18" aria-hidden="true">
                     <path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
@@ -65,6 +111,7 @@
         </p>
         <div class="title-right">
             <p style="text-align: right; margin: 0">Tony Cui</p>
+            <a href="https://www.figma.com/file/qCSGyweDkN6D027P1ctq4H/Slavery-Appraisal?type=design&node-id=0%3A1&mode=design&t=bNIwOMbnrs2t4QDK-1" style="text-align: right; margin: 0">Explore the mockup here!</a>
         </div>
     </div>
 
@@ -74,7 +121,7 @@
         <div style="width: 20%;">
             <!-- Filter by Age -->
             <div class="filter-box">
-                <p style="font-weight: bold;">Filter by Age</p>
+                <p class="filter-title" style="font-weight: bold;">Filter by Age</p>
                 <button onclick="filterByAge(0, 10)">Age 0-10</button>
                 <button onclick="filterByAge(11, 22)">Age 11-22</button>
                 <button onclick="filterByAge(23, 39)">Age 23-39</button>
@@ -83,7 +130,7 @@
 
             <!-- Filter by State -->
             <div class="filter-box">
-                <p style="font-weight: bold;">Filter by State</p>
+                <p class="filter-title" style="font-weight: bold;">Filter by State</p>
                 <button onclick="filterByState('NC')">NC</button>
                 <button onclick="filterByState('GA')">GA</button>
                 <button onclick="filterByState('TX')">TX</button>
@@ -97,14 +144,14 @@
 
             <!-- Filter by Gender -->
             <div class="filter-box">
-                <p style="font-weight: bold;">Filter by Gender</p>
+                <p class="filter-title" style="font-weight: bold;">Filter by Gender</p>
                 <button onclick="filterByGender('male')">Male</button>
                 <button onclick="filterByGender('female')">Female</button>
             </div>
 
             <!-- Filter by Year -->
             <div class="filter-box">
-                <p style="font-weight: bold;">Filter by Year</p>
+                <p class="filter-title" style="font-weight: bold;">Filter by Year</p>
                 <label for="start-year">Start Year:</label>
                 <input type="number" id="start-year" placeholder="YYYY" />
 
@@ -120,14 +167,26 @@
             <div id="container"></div> <!-- Graph container -->
         </div>
 
-        <!-- Summary box -->
+        <!-- Right-hand section with summary and progress bar -->
         <div class="summary-box">
+            <div class="progress-box"> <!-- New box for progress bar -->
+                <p class="filter-title">Number of Observations</p> <!-- Title for progress bar section -->
+                <div id="label">Filtered: 0 / 8437</div>
+                <div id="progress-bar">
+                    <div id="progress"></div>
+                </div>
+                <div id="percentage-label">0% filtered</div>
+            </div>
+
             <p id="range-value">Range: </p>
             <p id="iqr-value">IQR: </p>
             <p id="median-value">Median: </p>
             <p id="mean-value">Mean: </p>
             <p id="observations-value">Number of Observations: </p>
+            <!-- <div id="boxplot-container"></div> New container for the boxplot -->
         </div>
+    </div>
+        
     </div>
 
     <div class="title-box">
@@ -143,9 +202,92 @@
 
     <!-- Load custom JavaScript -->
     <script>
+// function createBoxplot(filteredData) {
+//     // Calculate the summary statistics for the filtered data
+//     const stats = calculateSummaryStatistics(filteredData);
 
+//     // Calculate the quartiles
+//     const q1 = stats.iqr / 2;
+//     const q3 = stats.iqr * 1.5;
+//     const median = stats.median;
+
+//     // Find min and max values for the whiskers (within 1.5 IQR from the quartiles)
+//     const minWhisker = d3.min(filteredData, d => d.appraisal >= q1 ? d.appraisal : null);
+//     const maxWhisker = d3.max(filteredData, d => d.appraisal <= q3 ? d.appraisal : null);
+
+//     // Create an SVG container for the boxplot
+//     const svg = d3.select('.summary-box')
+//         .append('svg')
+//         .attr('width', 200)
+//         .attr('height', 100);
+
+//     // Set up the scale
+//     const xScale = d3.scaleLinear()
+//         .domain([d3.min(filteredData, d => d.appraisal), d3.max(filteredData, d => d.appraisal)])
+//         .range([0, 180]);
+
+//     // Create and add the box (from Q1 to Q3)
+//     svg.append('rect')
+//         .attr('x', xScale(q1))
+//         .attr('y', 40)
+//         .attr('width', xScale(q3) - xScale(q1))
+//         .attr('height', 20)
+//         .attr('fill', '#c0c0c0');
+
+//     // Add the median line
+//     svg.append('line')
+//         .attr('x1', xScale(median))
+//         .attr('x2', xScale(median))
+//         .attr('y1', 35)
+//         .attr('y2', 65)
+//         .attr('stroke', 'black')
+//         .attr('stroke-width', 2);
+
+//     // Add the whiskers
+//     svg.append('line')
+//         .attr('x1', xScale(minWhisker))
+//         .attr('x2', xScale(q1))
+//         .attr('y1', 50)
+//         .attr('y2', 50)
+//         .attr('stroke', 'black')
+//         .attr('stroke-width', 2);
+
+//     svg.append('line')
+//         .attr('x1', xScale(maxWhisker))
+//         .attr('x2', xScale(q3))
+//         .attr('y1', 50)
+//         .attr('y2', 50)
+//         .attr('stroke', 'black')
+//         .attr('stroke-width', 2);
+
+//     // Update the summary statistics
+//     updateStatisticsDisplay(stats);
+// }
 
 // Function to calculate summary statistics
+function progressBar(dataPointsLeft){
+       // Total points and filtered points (you can update filteredPoints as needed)
+       const totalPoints = 8437;
+        let filteredPoints = dataPointsLeft; // Example: 2,500 observations filtered
+
+        // Calculate the percentage of observations filtered
+        const percentage = (filteredPoints / totalPoints) * 100;
+
+        // Update the progress bar width based on the percentage of filtered points
+        const progress = document.getElementById('progress');
+        progress.style.width = `${percentage}%`;
+
+        // Update the label with the filtered and total points
+        const label = document.getElementById('label');
+        label.innerText = `Filtered: ${filteredPoints} / ${totalPoints}`;
+
+        // Update the percentage label with the percentage of observations filtered
+        const percentageLabel = document.getElementById('percentage-label');
+        percentageLabel.innerText = `${percentage.toFixed(1)}% filtered`;
+}
+
+
+
 function calculateSummaryStatistics(filteredData) {
     // Calculate range
     const minValue = d3.min(filteredData, d => d.appraisal);
@@ -243,9 +385,13 @@ function filterByYear() {
             .attr("width", width)
             .attr("height", height);
 
-            function updateData(filteredData) {
+function updateData(filteredData) {
+
+
     // Remove existing SVG elements
     svg.selectAll("*").remove();
+
+    // createBoxplot(filteredData);
 
     // Calculate the new width and height of the chart area
     const chartWidth = width - marginLeft - marginRight;
@@ -337,6 +483,9 @@ function filterByYear() {
         .duration(750) // 750ms transition duration
         .attr("opacity", 0)
         .remove();
+
+    progressBar(filteredData.length);
+    console.log(filteredData.length)
 }
 
 // Function to update the statistics display
