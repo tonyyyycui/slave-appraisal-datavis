@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8">
-    <title>Data Visualization</title>
+    <title>Slavery Appraisal Data Visualization</title>
     <link rel="stylesheet" href="style.css">
     <style>
         /* Styling for tooltips */
@@ -61,6 +61,7 @@
         .graph-container {
             flex: 3; /* Takes up three times the space of the summary box */
             margin-right: 20px;
+            /* height: 500px; */
         }
 
         /* Styling for the right-hand summary box */
@@ -96,10 +97,14 @@
             font-size: 14px;
             margin-top: 5px;
         }
+/* Styling for the graph container */
+#container {
+    background-color: #f2e4f2; /* Sets the background color to light blue */
+}
+        
     </style>
 </head>
-
-<body>
+<body class = "container">
     <div class="title-box">
         <p class="title-text">
             US Slave Appraisals Across Time
@@ -178,21 +183,34 @@
                 <div id="percentage-label">0% filtered</div>
             </div>
 
+            <p class = "filter-title"> Summary Statistics 
             <p id="range-value">Range: </p>
             <p id="iqr-value">IQR: </p>
             <p id="median-value">Median: </p>
             <p id="mean-value">Mean: </p>
             <p id="observations-value">Number of Observations: </p>
             <!-- <div id="boxplot-container"></div> New container for the boxplot -->
+              <!-- New checkbox input element for toggling the line of best fit -->
+            </p>
+    <label for="toggle-line-of-best-fit">
+        <input type="checkbox" id="toggle-line-of-best-fit">
+        Show Line of Best Fit
+    </label>
         </div>
     </div>
         
     </div>
-
-    <div class="title-box">
-        <p style="text-align: center; width: 100%; font-weight: bold;">
-            Berry Slave Value Database
-        </p>
+    <div class="title-box" style="display: flex; justify-content: center; align-items: center;">
+        <div style="display: flex; justify-content: center; align-items: center;">
+            <p style="font-weight: bold; margin-right: 10px;">
+                Berry Slave Value Database
+            </p>
+            <a href="https://www.openicpsr.org/openicpsr/project/101113/version/V1/view">
+                <p style="font-size: 12px; margin-left: 10px;">
+                    Link
+                </p>
+            </a>
+        </div>
     </div>
 
     <div class="tooltip" id="tooltip"></div>
@@ -202,6 +220,9 @@
 
     <!-- Load custom JavaScript -->
     <script>
+
+// let bigData;
+
 // function createBoxplot(filteredData) {
 //     // Calculate the summary statistics for the filtered data
 //     const stats = calculateSummaryStatistics(filteredData);
@@ -262,7 +283,84 @@
 
 //     // Update the summary statistics
 //     updateStatisticsDisplay(stats);
-// }
+// // }
+//   // Add event listener to the checkbox
+//   document.getElementById('toggle-line-of-best-fit').addEventListener('change', function(event) {
+//         // Call the function to toggle the line of best fit
+//         toggleLineOfBestFit(event.target.checked);
+//     });
+
+//     // Function to toggle the line of best fit
+//     function toggleLineOfBestFit(show) {
+//         console.log('testing the value of the checkmark', show)
+//         if (show) {
+//             // Calculate the line of best fit and plot it on the graph
+//             const lineOfBestFit = calculateLineOfBestFit(bigData);
+
+//             // Plot the line of best fit on the graph
+//             plotLineOfBestFit(lineOfBestFit);
+//         } else {
+//             // Remove the line of best fit from the graph
+//             removeLineOfBestFit();
+//         }
+//     }
+
+    // // Function to calculate the line of best fit (linear regression)
+    // function calculateLineOfBestFit(data) {
+    //     // Perform linear regression using d3
+
+
+
+    //     const xMean = d3.mean(data, d => d.year);
+    //     const yMean = d3.mean(data, d => d.appraisal);
+
+    //     let numerator = 0;
+    //     let denominator = 0;
+
+    //     data.forEach(d => {
+    //         numerator += (d.year - xMean) * (d.appraisal - yMean);
+    //         denominator += Math.pow(d.year - xMean, 2);
+    //     });
+
+    //     const slope = numerator / denominator;
+    //     const intercept = yMean - slope * xMean;
+
+    //     // Calculate the line of best fit as an array of points
+    //     const lineOfBestFit = data.map(d => ({
+    //         x: d.year,
+    //         y: slope * d.year + intercept,
+    //     }));
+
+    //     return lineOfBestFit;
+    // }
+
+    // // Function to plot the line of best fit on the graph
+    // function plotLineOfBestFit(lineOfBestFit) {
+
+    //     const xScale = d3.scaleLinear()
+    // .domain([d3.min(data, d => d.x), d3.max(data, d => d.x)])
+    // .range([0, width]);
+    // const yScale = d3.scaleLinear()
+    // .domain([d3.min(data, d => d.y), d3.max(data, d => d.y)])
+    // .range([height, 0]); 
+
+    //     const line = d3.line()
+    //         .x(d => xScale(d.x))
+    //         .y(d => yScale(d.y));
+
+    //     svg.append('path')
+    //         .datum(lineOfBestFit)
+    //         .attr('class', 'line-of-best-fit')
+    //         .attr('d', line)
+    //         .attr('stroke', 'red')
+    //         .attr('stroke-width', 2)
+    //         .attr('fill', 'none');
+    // }
+
+    // // Function to remove the line of best fit from the graph
+    // function removeLineOfBestFit() {
+    //     svg.select('.line-of-best-fit').remove();
+    // }
 
 // Function to calculate summary statistics
 function progressBar(dataPointsLeft){
@@ -374,7 +472,7 @@ function filterByYear() {
 
         // Declare the chart dimensions and margins.
         const width = 800;
-        const height = 600; // Increased size
+        const height = 750; // Increased size
         const marginTop = 50; // Adjusted margins
         const marginRight = 50;
         const marginBottom = 100;
@@ -387,7 +485,7 @@ function filterByYear() {
 
 function updateData(filteredData) {
 
-
+    bigData = filteredData
     // Remove existing SVG elements
     svg.selectAll("*").remove();
 
@@ -468,9 +566,15 @@ function updateData(filteredData) {
         .attr("cy", d => y(d.appraisal))
         .attr("r", 5)
         .on("mouseover", function(event, d) {
+            d3.select(this)
+            .attr("fill", "#4b94f2") // Change fill color
+            .attr("r", 6); // Increase radius
             showTooltip(d);
         })
         .on("mouseout", function() {
+            d3.select(this)
+        .attr("fill", "black")
+        .attr("r", 5);
             hideTooltip();
         })
         .transition()
@@ -487,6 +591,8 @@ function updateData(filteredData) {
     progressBar(filteredData.length);
     console.log(filteredData.length)
 }
+
+
 
 // Function to update the statistics display
 function updateStatisticsDisplay(stats) {
