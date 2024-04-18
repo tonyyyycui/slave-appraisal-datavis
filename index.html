@@ -176,12 +176,13 @@
         <div class="summary-box">
             <div class="progress-box"> <!-- New box for progress bar -->
                 <p class="filter-title">Number of Observations</p> <!-- Title for progress bar section -->
-                <div id="label">Filtered: 0 / 8437</div>
+                <div id="label">Filtered: 0 / 8147</div>
                 <div id="progress-bar">
                     <div id="progress"></div>
                 </div>
                 <div id="percentage-label">0% filtered</div>
             </div>
+<div class = 'filter-box'>
 
             <p class = "filter-title"> Summary Statistics 
             <p id="range-value">Range: </p>
@@ -192,6 +193,8 @@
             <!-- <div id="boxplot-container"></div> New container for the boxplot -->
               <!-- New checkbox input element for toggling the line of best fit -->
             </p>
+        </div>
+
     <label for="toggle-line-of-best-fit">
         <input type="checkbox" id="toggle-line-of-best-fit">
         Show Line of Best Fit
@@ -216,12 +219,15 @@
     <div class="tooltip" id="tooltip"></div>
 
     <!-- Load D3.js -->
+    <script src="https://unpkg.com/d3-regression@1.3.10/dist/d3-regression.min.js"></script>
+
     <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+
 
     <!-- Load custom JavaScript -->
     <script>
 
-// let bigData;
+let bigData;
 
 // function createBoxplot(filteredData) {
 //     // Calculate the summary statistics for the filtered data
@@ -365,7 +371,7 @@
 // Function to calculate summary statistics
 function progressBar(dataPointsLeft){
        // Total points and filtered points (you can update filteredPoints as needed)
-       const totalPoints = 8437;
+       const totalPoints = 8147;
         let filteredPoints = dataPointsLeft; // Example: 2,500 observations filtered
 
         // Calculate the percentage of observations filtered
@@ -382,6 +388,22 @@ function progressBar(dataPointsLeft){
         // Update the percentage label with the percentage of observations filtered
         const percentageLabel = document.getElementById('percentage-label');
         percentageLabel.innerText = `${percentage.toFixed(1)}% filtered`;
+}
+
+// Define the function to calculate the line of best fit
+function calculateRegression(data) {
+    // Use d3-regression to perform linear regression
+    const regression = d3.regressionLinear()
+        .x(d => d.year) // Define the x value as the year
+        .y(d => d.appraisal); // Define the y value as the appraisal
+
+    // Calculate the regression result using the data
+    const result = regression(data);
+
+    console.log('regression: ', result)
+
+    // Return the calculated line of best fit
+    return result;
 }
 
 function calculateLineOfBestFit(data) {
@@ -449,6 +471,7 @@ function toggleLineOfBestFit(show) {
     if (show) {
         // Calculate the line of best fit using the full dataset
         const lineOfBestFit = calculateLineOfBestFit(bigData);
+        calculateRegression(bigData)
 
         // Plot the line of best fit
         plotLineOfBestFit(lineOfBestFit);
@@ -563,6 +586,9 @@ function filterByYear() {
             .attr("height", height);
 
 function updateData(filteredData) {
+    // toggleLineOfBestFit(false)
+    //this will filter out all the data points that have an unspecified appraisal!!!
+    filteredData = filteredData.filter(d => d.appraisal );
 
     bigData = filteredData
     // Remove existing SVG elements
@@ -686,9 +712,18 @@ function updateStatisticsDisplay(stats) {
 
         function showTooltip(data) {
     const tooltip = document.getElementById('tooltip');
-    tooltip.innerHTML = `Name: ${data.name}<br>Age: ${data.age}<br>Sex: ${data.sex}<br>State: ${data.state}`;
-    tooltip.style.display = 'block';
-    tooltip.style.left = (d3.event.pageX + 10) + 'px';
+
+ // Update the inner HTML of the tooltip with the data properties
+ tooltip.innerHTML = `
+        Name: ${data.name}<br>
+        Age: ${data.age}<br>
+        Sex: ${data.sex}<br>
+        State: ${data.state}<br>
+        Year: ${data.year}<br>
+        Appraisal (CPI 2014): ${data['app.cpi.2014']}
+    `;
+        tooltip.style.display = 'block';
+    // tooltip.style.left = (d3.event.pageX + 10) + 'px';
     tooltip.style.bottom = 'auto'; // Reset bottom property
     tooltip.style.top = ''; // Reset top property
 }
