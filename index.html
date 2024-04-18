@@ -384,6 +384,85 @@ function progressBar(dataPointsLeft){
         percentageLabel.innerText = `${percentage.toFixed(1)}% filtered`;
 }
 
+function calculateLineOfBestFit(data) {
+    // Calculate the mean of the x (year) and y (appraisal) values
+    const xMean = d3.mean(data, d => d.year);
+    const yMean = d3.mean(data, d => d.appraisal);
+
+    // Initialize numerator and denominator for calculating the slope
+    let numerator = 0;
+    let denominator = 0;
+
+    // Calculate the slope of the line (b)
+    data.forEach(d => {
+        numerator += (d.year - xMean) * (d.appraisal - yMean);
+        denominator += (d.year - xMean) ** 2;
+    });
+
+    const slope = numerator / denominator;
+
+    console.log('yo slope',slope
+    )
+
+    // Calculate the intercept (a) of the line
+    const intercept = yMean - slope * xMean;
+    console.log('yo intercept ', intercept)
+
+    // Calculate the line of best fit points
+    const lineOfBestFit = data.map(d => ({
+        x: d.year,
+        y: slope * d.year + intercept,
+    }));
+
+    return lineOfBestFit;
+}
+
+function plotLineOfBestFit(lineOfBestFit) {
+    // Select the graph container (SVG element) for plotting
+    const svg = d3.select('#container svg');
+
+    // Define the x and y scales (assumes existing scales in your code)
+    const xScale = d3.scaleLinear()
+        .domain([d3.min(lineOfBestFit, d => d.x), d3.max(lineOfBestFit, d => d.x)])
+        .range([0, svg.attr('width')]);
+
+    const yScale = d3.scaleLinear()
+        .domain([d3.min(lineOfBestFit, d => d.y), d3.max(lineOfBestFit, d => d.y)])
+        .range([svg.attr('height'), 0]);
+
+    // Define the line generator
+    const line = d3.line()
+        .x(d => xScale(d.x))
+        .y(d => yScale(d.y));
+
+    // Add the line of best fit to the graph
+    svg.append('path')
+        .datum(lineOfBestFit)
+        .attr('class', 'line-of-best-fit')
+        .attr('d', line)
+        .attr('stroke', 'red')
+        .attr('stroke-width', 2)
+        .attr('fill', 'none');
+}
+
+function toggleLineOfBestFit(show) {
+    if (show) {
+        // Calculate the line of best fit using the full dataset
+        const lineOfBestFit = calculateLineOfBestFit(bigData);
+
+        // Plot the line of best fit
+        plotLineOfBestFit(lineOfBestFit);
+    } else {
+        // Remove the line of best fit from the graph
+        d3.select('#container svg').selectAll('.line-of-best-fit').remove();
+    }
+}
+
+// Add event listener to the checkbox
+document.getElementById('toggle-line-of-best-fit').addEventListener('change', function(event) {
+    toggleLineOfBestFit(event.target.checked);
+});
+
 
 
 function calculateSummaryStatistics(filteredData) {
