@@ -40,6 +40,9 @@
             padding: 10px;
             margin-bottom: 10px;
             background-color: #f2e4f2; /* Same background color as filter boxes */
+            align-items: center;
+            text-align: center;
+
         }
 
         /* Styling for filter titles */
@@ -50,6 +53,7 @@
             font-weight: bold;
             border-bottom: 1px solid black;
             text-align: center; /* This will center the text */
+            align-items: center;
         }
 
         /* Container for the entire main content area */
@@ -96,6 +100,9 @@
         #percentage-label {
             font-size: 14px;
             margin-top: 5px;
+        }
+        .radio-group {
+            display: inline-block;
         }
 /* Styling for the graph container */
 #container {
@@ -165,6 +172,22 @@
 
                 <button onclick="filterByYear()">Filter by Years</button>
             </div>
+
+            <div class = "filter-box">
+                <p class="filter-title" style="font-weight: bold;">Use Different CPI's</p>
+
+                   <!-- Either-Or Toggle Switch (Radio Buttons) -->
+      <div class="radio-group">
+        <label>
+            <input type="radio" name="filter" id="toggle1860" value="1860">
+            Use CPI in 1860
+        </label>
+        <label>
+            <input type="radio" name="filter" id="toggle2014" value="2014" checked>
+            Use CPI in 2014
+        </label>
+    </div>
+            </div>
         </div>
 
         <!-- Graph container -->
@@ -194,13 +217,18 @@
               <!-- New checkbox input element for toggling the line of best fit -->
             </p>
         </div>
+        <div class = 'filter-box'>
 
+       
+<p class = "filter-title"> Linear Regression Model </p>
     <label for="toggle-line-of-best-fit">
         <input type="checkbox" id="toggle-line-of-best-fit">
         Show Line of Best Fit
     </label>
+</div>
         </div>
     </div>
+
         
     </div>
     <div class="title-box" style="display: flex; justify-content: center; align-items: center;">
@@ -216,6 +244,8 @@
         </div>
     </div>
 
+    
+
     <div class="tooltip" id="tooltip"></div>
 
     <!-- Load D3.js -->
@@ -228,145 +258,7 @@
     <script>
 
 let bigData;
-
-// function createBoxplot(filteredData) {
-//     // Calculate the summary statistics for the filtered data
-//     const stats = calculateSummaryStatistics(filteredData);
-
-//     // Calculate the quartiles
-//     const q1 = stats.iqr / 2;
-//     const q3 = stats.iqr * 1.5;
-//     const median = stats.median;
-
-//     // Find min and max values for the whiskers (within 1.5 IQR from the quartiles)
-//     const minWhisker = d3.min(filteredData, d => d.appraisal >= q1 ? d.appraisal : null);
-//     const maxWhisker = d3.max(filteredData, d => d.appraisal <= q3 ? d.appraisal : null);
-
-//     // Create an SVG container for the boxplot
-//     const svg = d3.select('.summary-box')
-//         .append('svg')
-//         .attr('width', 200)
-//         .attr('height', 100);
-
-//     // Set up the scale
-//     const xScale = d3.scaleLinear()
-//         .domain([d3.min(filteredData, d => d.appraisal), d3.max(filteredData, d => d.appraisal)])
-//         .range([0, 180]);
-
-//     // Create and add the box (from Q1 to Q3)
-//     svg.append('rect')
-//         .attr('x', xScale(q1))
-//         .attr('y', 40)
-//         .attr('width', xScale(q3) - xScale(q1))
-//         .attr('height', 20)
-//         .attr('fill', '#c0c0c0');
-
-//     // Add the median line
-//     svg.append('line')
-//         .attr('x1', xScale(median))
-//         .attr('x2', xScale(median))
-//         .attr('y1', 35)
-//         .attr('y2', 65)
-//         .attr('stroke', 'black')
-//         .attr('stroke-width', 2);
-
-//     // Add the whiskers
-//     svg.append('line')
-//         .attr('x1', xScale(minWhisker))
-//         .attr('x2', xScale(q1))
-//         .attr('y1', 50)
-//         .attr('y2', 50)
-//         .attr('stroke', 'black')
-//         .attr('stroke-width', 2);
-
-//     svg.append('line')
-//         .attr('x1', xScale(maxWhisker))
-//         .attr('x2', xScale(q3))
-//         .attr('y1', 50)
-//         .attr('y2', 50)
-//         .attr('stroke', 'black')
-//         .attr('stroke-width', 2);
-
-//     // Update the summary statistics
-//     updateStatisticsDisplay(stats);
-// // }
-//   // Add event listener to the checkbox
-//   document.getElementById('toggle-line-of-best-fit').addEventListener('change', function(event) {
-//         // Call the function to toggle the line of best fit
-//         toggleLineOfBestFit(event.target.checked);
-//     });
-
-//     // Function to toggle the line of best fit
-//     function toggleLineOfBestFit(show) {
-//         console.log('testing the value of the checkmark', show)
-//         if (show) {
-//             // Calculate the line of best fit and plot it on the graph
-//             const lineOfBestFit = calculateLineOfBestFit(bigData);
-
-//             // Plot the line of best fit on the graph
-//             plotLineOfBestFit(lineOfBestFit);
-//         } else {
-//             // Remove the line of best fit from the graph
-//             removeLineOfBestFit();
-//         }
-//     }
-
-    // // Function to calculate the line of best fit (linear regression)
-    // function calculateLineOfBestFit(data) {
-    //     // Perform linear regression using d3
-
-
-
-    //     const xMean = d3.mean(data, d => d.year);
-    //     const yMean = d3.mean(data, d => d.appraisal);
-
-    //     let numerator = 0;
-    //     let denominator = 0;
-
-    //     data.forEach(d => {
-    //         numerator += (d.year - xMean) * (d.appraisal - yMean);
-    //         denominator += Math.pow(d.year - xMean, 2);
-    //     });
-
-    //     const slope = numerator / denominator;
-    //     const intercept = yMean - slope * xMean;
-
-    //     // Calculate the line of best fit as an array of points
-    //     const lineOfBestFit = data.map(d => ({
-    //         x: d.year,
-    //         y: slope * d.year + intercept,
-    //     }));
-
-    //     return lineOfBestFit;
-    // }
-
-    // // Function to plot the line of best fit on the graph
-    // function plotLineOfBestFit(lineOfBestFit) {
-
-    //     const xScale = d3.scaleLinear()
-    // .domain([d3.min(data, d => d.x), d3.max(data, d => d.x)])
-    // .range([0, width]);
-    // const yScale = d3.scaleLinear()
-    // .domain([d3.min(data, d => d.y), d3.max(data, d => d.y)])
-    // .range([height, 0]); 
-
-    //     const line = d3.line()
-    //         .x(d => xScale(d.x))
-    //         .y(d => yScale(d.y));
-
-    //     svg.append('path')
-    //         .datum(lineOfBestFit)
-    //         .attr('class', 'line-of-best-fit')
-    //         .attr('d', line)
-    //         .attr('stroke', 'red')
-    //         .attr('stroke-width', 2)
-    //         .attr('fill', 'none');
-    // }
-
-    // // Function to remove the line of best fit from the graph
-    // function removeLineOfBestFit() {
-    //     svg.select('.line-of-best-fit').remove();
-    // }
+let boolCPI = true; //true => 2014, false => 1860 
 
 // Function to calculate summary statistics
 function progressBar(dataPointsLeft){
@@ -487,6 +379,45 @@ document.getElementById('toggle-line-of-best-fit').addEventListener('change', fu
 });
 
 
+// Create HTML for toggle switches
+const toggle1860 = document.getElementById('toggle1860');
+const toggle2014 = document.getElementById('toggle2014');
+
+toggle1860.addEventListener('change', function() {
+            if (this.checked) {
+                // Call a function to filter data points based on app.cpi.1860
+                boolCPI = false;
+                applyCPIFilter('1860');
+            }
+        });
+
+        toggle2014.addEventListener('change', function() {
+            if (this.checked) {
+                // Call a function to filter data points based on app.cpi.2014
+                boolCPI = true;
+
+                applyCPIFilter('2014');
+            }
+        });
+
+
+// Function to apply the filter
+function applyCPIFilter(year) {
+    // Reset the filtered data
+    filteredData = data.slice(); // Copy original data
+    
+    // Apply filter based on toggle1860
+    if (year == '1860') {
+        filteredData = filteredData.filter(d => d['app.cpi.1860']);
+    }
+    // Apply filter based on toggle2014
+    if (year == '2014') {
+        filteredData = filteredData.filter(d => d['app.cpi.2014']);
+    }
+    
+    // Update your visualization with the filteredData
+    updateData(filteredData);
+}
 
 function calculateSummaryStatistics(filteredData) {
     // Calculate range
@@ -714,13 +645,20 @@ function updateStatisticsDisplay(stats) {
     const tooltip = document.getElementById('tooltip');
 
  // Update the inner HTML of the tooltip with the data properties
+     // Parse the year from the data.year property
+     const date = new Date(data.year);
+    const year = date.getFullYear();
+
+    const cpiValue = boolCPI ? data['app.cpi.2014'] : data['app.cpi.1860'];
+
+
  tooltip.innerHTML = `
         Name: ${data.name}<br>
         Age: ${data.age}<br>
         Sex: ${data.sex}<br>
         State: ${data.state}<br>
-        Year: ${data.year}<br>
-        Appraisal (CPI 2014): ${data['app.cpi.2014']}
+        Year: ${year}<br>
+    Appraisal (CPI ${boolCPI ? '2014' : '1860'}): ${cpiValue}
     `;
         tooltip.style.display = 'block';
     // tooltip.style.left = (d3.event.pageX + 10) + 'px';
@@ -742,6 +680,7 @@ function hideTooltip() {
             data.forEach(d => {
                 d.year = new Date(+d.year, 0, 1); // Parse year as date
                 d.appraisal = +d['app.cpi.2014']; // Parse appraisal value
+                // d.appraisal1860 = +d['app.cpi.1860'];
                 d.name = d['name']; // Parse name field
                  d.age = +d['age']; // Parse age field
                  d.sex = d['sex']; // Parse sex field
