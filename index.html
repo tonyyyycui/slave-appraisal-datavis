@@ -403,16 +403,17 @@ toggle1860.addEventListener('change', function() {
 // Function to apply the filter
 function applyCPIFilter(year) {
     // Reset the filtered data
+    runData()
     filteredData = data.slice(); // Copy original data
     
-    // Apply filter based on toggle1860
-    if (year == '1860') {
-        filteredData = filteredData.filter(d => d['app.cpi.1860']);
-    }
-    // Apply filter based on toggle2014
-    if (year == '2014') {
-        filteredData = filteredData.filter(d => d['app.cpi.2014']);
-    }
+    // // Apply filter based on toggle1860
+    // if (year == '1860') {
+    //     filteredData = filteredData.filter(d => d['app.cpi.1860']);
+    // }
+    // // Apply filter based on toggle2014
+    // if (year == '2014') {
+    //     filteredData = filteredData.filter(d => d['app.cpi.2014']);
+    // }
     
     // Update your visualization with the filteredData
     updateData(filteredData);
@@ -518,7 +519,7 @@ function filterByYear() {
 function updateData(filteredData) {
     // toggleLineOfBestFit(false)
     //this will filter out all the data points that have an unspecified appraisal!!!
-    filteredData = filteredData.filter(d => d.appraisal );
+    filteredData = filteredData.filter(d => d.appraisal);
 
     bigData = filteredData
     // Remove existing SVG elements
@@ -672,13 +673,22 @@ function hideTooltip() {
 
         // Read the CSV data.
         let data;
-
+        runData();
         // Fetch data
+function runData(){
         d3.csv("berry-data.csv").then(csvData => {
             data = csvData;
             data.forEach(d => {
                 d.year = new Date(+d.year, 0, 1); // Parse year as date
-                d.appraisal = +d['app.cpi.2014']; // Parse appraisal value
+                if(boolCPI){
+                    d.appraisal = +d['app.cpi.2014']; // Parse appraisal value
+
+                }
+                else{
+                    d.appraisal = +d['app.cpi.1860'];
+
+                }
+
                 // d.appraisal1860 = +d['app.cpi.1860'];
                 d.name = d['name']; // Parse name field
                  d.age = +d['age']; // Parse age field
@@ -696,6 +706,7 @@ function hideTooltip() {
         }).catch(error => {
             console.log("Error loading data:", error);
         });
+    }
     </script>
 </body>
 </html>
