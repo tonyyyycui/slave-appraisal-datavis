@@ -138,10 +138,10 @@
             <!-- Filter by Age -->
             <div class="filter-box">
                 <p class="filter-title" style="font-weight: bold;">Filter by Age</p>
-                <button onclick="filterByAge(0, 10)">Age 0-10</button>
-                <button onclick="filterByAge(11, 22)">Age 11-22</button>
-                <button onclick="filterByAge(23, 39)">Age 23-39</button>
-                <button onclick="filterByAge(40, 100)">Age 40+</button>
+                <button id="age_0_10" onclick="filterByAge(0, 10)">Age 0-10</button>
+                <button id="age_11_22" onclick="filterByAge(11, 22)">Age 11-22</button>
+                <button id="age_23_39" onclick="filterByAge(23, 39)">Age 23-39</button>
+                <button id="age_40_100" onclick="filterByAge(40, 100)">Age 40+</button>
             </div>
 
             <!-- Filter by State -->
@@ -543,12 +543,31 @@ function filterByYear() {
 }
         // Function to filter data by age
         function filterByAge(minAge, maxAge) {
-            const filteredData = data.filter(d => {
-                const age = parseFloat(d.age);
-                return age >= minAge && age <= maxAge;
-            });
-            updateData(filteredData);
+    if (filterMap.has('age')) {
+        const ageFilters = filterMap.get('age');
+        // Check if the age range already exists in the filters
+        const index = ageFilters.findIndex(filter => filter.minAge === minAge && filter.maxAge === maxAge);
+        if (index !== -1) {
+            // Age range exists, so remove it
+            ageFilters.splice(index, 1);
+        } else {
+            // Age range doesn't exist, so add it
+            ageFilters.push({ minAge: minAge, maxAge: maxAge });
         }
+    } else {
+        // 'age' key doesn't exist in filterMap, initialize it
+        filterMap.set('age', [{ minAge: minAge, maxAge: maxAge }]);
+    }
+
+    // Toggle active class for the button
+    const button = document.getElementById('age_' + minAge + '_' + maxAge);
+    if (button) {
+        button.classList.toggle('active');
+    }
+
+    // Update data based on current filters
+    updateData(data);
+}
 
          // Function to filter data by gender
          function filterByGender(gender) {
@@ -596,7 +615,13 @@ function updateData(filteredData) {
     filteredData = filteredData.filter(d => filterMap.get('state').includes(d.state));
     // // Filter data within the specified year range
     filteredData = filteredData.filter(d => d.year >= firstYear && d.year <= lastYear);
-
+    const ageFilters = filterMap.get('age');
+    if (ageFilters.length > 0) {
+        filteredData = filteredData.filter(d => {
+            // Check if the age falls within any of the selected age ranges
+            return ageFilters.some(range => d.age >= range.minAge && d.age <= range.maxAge);
+        });
+    }
     // console.log('this is yo map', map.sex)
 
     bigData = filteredData
