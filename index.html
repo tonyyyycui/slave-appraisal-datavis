@@ -147,15 +147,17 @@
             <!-- Filter by State -->
             <div class="filter-box">
                 <p class="filter-title" style="font-weight: bold;">Filter by State</p>
-                <button onclick="filterByState('NC')">NC</button>
-                <button onclick="filterByState('GA')">GA</button>
-                <button onclick="filterByState('TX')">TX</button>
-                <button onclick="filterByState('TN')">TN</button>
-                <button onclick="filterByState('LA')">LA</button>
-                <button onclick="filterByState('AL')">AL</button>
-                <button onclick="filterByState('VA')">VA</button>
-                <button onclick="filterByState('MS')">MS</button>
-                <button onclick="filterByState('unspecified')">Unspecified</button>
+                <button id="state_NC" onclick="filterByState('NC')">NC</button>
+                <button id="state_GA" onclick="filterByState('GA')">GA</button>
+                <button id="state_TX" onclick="filterByState('TX')">TX</button>
+                <button id="state_TN" onclick="filterByState('TN')">TN</button>
+                <button id="state_LA" onclick="filterByState('LA')">LA</button>
+                <button id="state_AL" onclick="filterByState('AL')">AL</button>
+                <button id="state_VA" onclick="filterByState('VA')">VA</button>
+                <button id="state_MS" onclick="filterByState('MS')">MS</button>
+                <button id="state_MD" onclick="filterByState('MD')">MD</button>
+
+                <button id="state_unspecified" onclick="filterByState('unspecified')">Unspecified</button>
             </div>
 
             <!-- Filter by Gender -->
@@ -169,7 +171,7 @@
             <div class="filter-box">
                 <p class="filter-title" style="font-weight: bold;">Filter by Year</p>
                 <label for="start-year">Start Year:</label>
-                <input type="number" id="start-year" placeholder="YYYY" />
+                <input type="number" id="start-year" placeholder="YYYY" value = s />
 
                 <label for="end-year">End Year:</label>
                 <input type="number" id="end-year" placeholder="YYYY" />
@@ -266,9 +268,19 @@ let boolCPI = true; //true => 2014, false => 1860
 let filterMap = new Map([
     ['age',[]],
     ['state', []],
-    ['sex', []],
-    ['year', []]
+    ['sex', []]
+    // ['year', []]
  ])
+
+ 
+let firstYear = new Date(1797, 0, 1);
+let lastYear = new Date(1865, 0, 1);
+
+document.getElementById('start-year').value = firstYear.getFullYear();
+document.getElementById('end-year').value = lastYear.getFullYear(); // Assuming endDate is another global JavaScript variable
+
+
+
 
 // Function to calculate summary statistics
 function progressBar(dataPointsLeft){
@@ -459,19 +471,46 @@ function calculateSummaryStatistics(filteredData) {
         numberOfObservations
     };
 }
+
+
 function filterByState(state) {
-            let filteredData;
-            
-            if (state === 'unspecified') {
-                // Filter data where state is missing or unspecified
-                filteredData = data.filter(d => !d.state || d.state.trim() === '');
-            } else {
-                // Filter data based on the selected state
-                filteredData = data.filter(d => d.state === state);
-            }
-            
-            updateData(filteredData);
+    
+    if (filterMap.has('state')) {
+        const stateFilters = filterMap.get('state');
+    
+        let index = stateFilters.indexOf(state);
+        if(state === 'unspecified'){
+            index = stateFilters.indexOf('unspecified')
         }
+        const button = document.getElementById('state_' + state);
+        button.classList.toggle('active');
+        if (index !== -1) {
+            // State exists, so remove it
+            stateFilters.splice(index, 1);
+        } else {
+            // State doesn't exist, so add it
+            if (state === 'unspecified'){
+                stateFilters.push('')
+            }
+            else{
+                stateFilters.push(state);
+            }
+        }
+    } else {
+        // 'state' key doesn't exist in filterMap
+        console.error("Filter map does not contain 'state' key.");
+    }
+
+    // if (state === 'unspecified') {
+    //     // Filter data where state is missing or unspecified
+    //     filteredData = data.filter(d => !d.state || d.state.trim() === '');
+    // } else {
+    //     // Filter data based on the selected state
+    //     filteredData = data.filter(d => d.state === state);
+    // }
+    
+    updateData(data);
+}
 
          // Function to filter data by year range
 function filterByYear() {
@@ -489,16 +528,18 @@ function filterByYear() {
     const startDate = new Date(startYear, 0, 1); // January 1st of start year
     const endDate = new Date(endYear, 11, 31); // December 31st of end year
 
-    // Filter data within the specified year range
-    const filteredData = data.filter(d => {
-        // Convert `d.year` to a Date object, if not already
-        const dataDate = new Date(d.year);
-        // Compare `dataDate` with `startDate` and `endDate`
-        return dataDate >= startDate && dataDate <= endDate;
-    });
+    // // Filter data within the specified year range
+    // const filteredData = data.filter(d => {
+    //     // Convert `d.year` to a Date object, if not already
+    //     const dataDate = new Date(d.year);
+    //     // Compare `dataDate` with `startDate` and `endDate`
+    //     return dataDate >= startDate && dataDate <= endDate;
+    // });
 
+    firstYear = startDate 
+    lastYear = endDate
     // Update the graph with the filtered data
-    updateData(filteredData);
+    updateData(data);
 }
         // Function to filter data by age
         function filterByAge(minAge, maxAge) {
@@ -552,6 +593,9 @@ function updateData(filteredData) {
     //this will filter out all the data points that have an unspecified appraisal!!!
     filteredData = filteredData.filter(d => d.appraisal);
     filteredData = filteredData.filter(d => filterMap.get('sex').includes(d.sex));
+    filteredData = filteredData.filter(d => filterMap.get('state').includes(d.state));
+    // // Filter data within the specified year range
+    filteredData = filteredData.filter(d => d.year >= firstYear && d.year <= lastYear);
 
     // console.log('this is yo map', map.sex)
 
