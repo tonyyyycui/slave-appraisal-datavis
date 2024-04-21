@@ -104,6 +104,10 @@
         .radio-group {
             display: inline-block;
         }
+         /* CSS for active state */
+    .active {
+        background-color: #4CAF50; /* Green */
+    }
 /* Styling for the graph container */
 #container {
     background-color: #f2e4f2; /* Sets the background color to light blue */
@@ -157,8 +161,8 @@
             <!-- Filter by Gender -->
             <div class="filter-box">
                 <p class="filter-title" style="font-weight: bold;">Filter by Sex</p>
-                <button onclick="filterByGender('male')">Male</button>
-                <button onclick="filterByGender('female')">Female</button>
+                <button id="gender_male" onclick="filterByGender('male')">Male</button>
+                <button id="gender_female" onclick="filterByGender('female')">Female</button>
             </div>
 
             <!-- Filter by Year -->
@@ -259,6 +263,12 @@
 
 let bigData;
 let boolCPI = true; //true => 2014, false => 1860 
+let filterMap = new Map([
+    ['age',[]],
+    ['state', []],
+    ['sex', []],
+    ['year', []]
+ ])
 
 // Function to calculate summary statistics
 function progressBar(dataPointsLeft){
@@ -293,7 +303,8 @@ function calculateRegression(data) {
     const result = regression(data);
 
     console.log('regression: ', result)
-
+    console.log('realistic y-intercept', result[0][1])
+    console.log('realistic slope', result[1][1])
     // Return the calculated line of best fit
     return result;
 }
@@ -500,8 +511,27 @@ function filterByYear() {
 
          // Function to filter data by gender
          function filterByGender(gender) {
-            const filteredData = data.filter(d => d.sex === gender);
-            updateData(filteredData);
+            // console.log('first checkpoint')
+            if (filterMap.has('sex')) {
+        const sexFilters = filterMap.get('sex');
+        const index = sexFilters.indexOf(gender);
+        const button = document.getElementById('gender_' + gender);
+            button.classList.toggle('active');
+        if (index !== -1) {
+            // Gender exists, so remove it
+            sexFilters.splice(index, 1);
+        } else {
+            // Gender doesn't exist, so add it
+            sexFilters.push(gender);
+        }
+    } else {
+        // 'sex' key doesn't exist in filterMap
+        console.error("Filter map does not contain 'sex' key.");
+    }
+
+    console.log(filterMap)
+    // const filteredData = data.filter(d => d.sex === gender);
+            updateData(data);
         }
 
         // Declare the chart dimensions and margins.
@@ -521,6 +551,9 @@ function updateData(filteredData) {
     // toggleLineOfBestFit(false)
     //this will filter out all the data points that have an unspecified appraisal!!!
     filteredData = filteredData.filter(d => d.appraisal);
+    filteredData = filteredData.filter(d => filterMap.get('sex').includes(d.sex));
+
+    // console.log('this is yo map', map.sex)
 
     bigData = filteredData
     // Remove existing SVG elements
