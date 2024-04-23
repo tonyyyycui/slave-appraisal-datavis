@@ -163,8 +163,8 @@
             <!-- Filter by Gender -->
             <div class="filter-box">
                 <p class="filter-title" style="font-weight: bold;">Filter by Sex</p>
-                <button id="gender_male" onclick="filterByGender('male')">Male</button>
-                <button id="gender_female" onclick="filterByGender('female')">Female</button>
+                <button id="sex_male" onclick="filterByGender('male')">Male</button>
+                <button id="sex_female" onclick="filterByGender('female')">Female</button>
             </div>
 
             <!-- Filter by Year -->
@@ -259,6 +259,9 @@
 
     <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
 
+    <script src="https://cdn.jsdelivr.net/npm/regression/dist/regression.min.js"></script>
+
+
 
     <!-- Load custom JavaScript -->
     <script>
@@ -303,27 +306,26 @@ function progressBar(dataPointsLeft){
         const percentageLabel = document.getElementById('percentage-label');
         percentageLabel.innerText = `${percentage.toFixed(1)}% filtered`;
 }
-
 // Define the function to calculate the line of best fit
 function calculateRegression(data) {
     // Use d3-regression to perform linear regression
     const regression = d3.regressionLinear()
-        .x(d => d.year) // Define the x value as the year
+        .x(d => d.year.getFullYear() - 1797) // Use the full year as x-value
         .y(d => d.appraisal); // Define the y value as the appraisal
 
     // Calculate the regression result using the data
     const result = regression(data);
 
-    console.log('regression: ', result)
-    console.log('realistic y-intercept', result[0][1])
-    console.log('realistic slope', result[1][1])
+    console.log('using calculateRegression() regression: ', result)
+    console.log('realistic y-intercept', result.b)
+    console.log('realistic slope', result.a)
+    // console.log('regression number of points', bigData.length, data.length)
     // Return the calculated line of best fit
     return result;
 }
-
 function calculateLineOfBestFit(data) {
     // Calculate the mean of the x (year) and y (appraisal) values
-    const xMean = d3.mean(data, d => d.year);
+    const xMean = d3.mean(data, d => d.year - 1797);
     const yMean = d3.mean(data, d => d.appraisal);
 
     // Initialize numerator and denominator for calculating the slope
@@ -332,49 +334,71 @@ function calculateLineOfBestFit(data) {
 
     // Calculate the slope of the line (b)
     data.forEach(d => {
-        numerator += (d.year - xMean) * (d.appraisal - yMean);
-        denominator += (d.year - xMean) ** 2;
+        numerator += (d.year - 1797 - xMean) * (d.appraisal - yMean);
+        denominator += (d.year - 1797 - xMean) ** 2;
     });
 
     const slope = numerator / denominator;
 
-    console.log('yo slope',slope
-    )
-
     // Calculate the intercept (a) of the line
     const intercept = yMean - slope * xMean;
-    console.log('yo intercept ', intercept)
 
     // Calculate the line of best fit points
     const lineOfBestFit = data.map(d => ({
         x: d.year,
-        y: slope * d.year + intercept,
+        y: slope * (d.year - 1797) + intercept,
     }));
 
     return lineOfBestFit;
 }
 
-function plotLineOfBestFit(lineOfBestFit) {
+
+// function calcBestFit(data) {
+//     // Extract years and appraisals from the data
+//     const xyData = data.map(d => [d.year - 1797, d.appraisal]);
+
+//     // Perform linear regression using regression-js
+//     const result = regression.linear(xyData);
+
+//     // Get slope and intercept
+//     const slope = result.equation[0];
+//     const intercept = result.equation[1];
+
+//     // Calculate the line of best fit points
+//     const lineOfBestFit = data.map(d => ({
+//         x: d.year,
+//         y: slope * (d.year - 1797) + intercept,
+//     }));
+//     console.log(' this also better be right. slope:', slope, intercept)
+//     console.log('this better be right. line:', lineOfBestFit
+//     )
+//     return lineOfBestFit;
+// }
+
+function plotLineOfBestFit(data) {
+    // Calculate regression result
+    const regressionResult = calculateRegression(data);
+
     // Select the graph container (SVG element) for plotting
     const svg = d3.select('#container svg');
 
     // Define the x and y scales (assumes existing scales in your code)
     const xScale = d3.scaleLinear()
-        .domain([d3.min(lineOfBestFit, d => d.x), d3.max(lineOfBestFit, d => d.x)])
+        .domain([d3.min(data, d => d.year), d3.max(data, d => d.year)])
         .range([0, svg.attr('width')]);
 
     const yScale = d3.scaleLinear()
-        .domain([d3.min(lineOfBestFit, d => d.y), d3.max(lineOfBestFit, d => d.y)])
+        .domain([d3.min(data, d => d.appraisal), d3.max(data, d => d.appraisal)])
         .range([svg.attr('height'), 0]);
 
     // Define the line generator
     const line = d3.line()
-        .x(d => xScale(d.x))
-        .y(d => yScale(d.y));
+        .x(d => xScale(d.year))
+        .y(d => yScale(regressionResult.a * (d.year.getFullYear() - 1797) + regressionResult.b));
 
     // Add the line of best fit to the graph
     svg.append('path')
-        .datum(lineOfBestFit)
+        .datum(data)
         .attr('class', 'line-of-best-fit')
         .attr('d', line)
         .attr('stroke', 'red')
@@ -385,11 +409,12 @@ function plotLineOfBestFit(lineOfBestFit) {
 function toggleLineOfBestFit(show) {
     if (show) {
         // Calculate the line of best fit using the full dataset
-        const lineOfBestFit = calculateLineOfBestFit(bigData);
-        calculateRegression(bigData)
+         plotLineOfBestFit(bigData);
+        // calculateRegression(bigData)
+        // calcBestFit(bigData)
 
         // Plot the line of best fit
-        plotLineOfBestFit(lineOfBestFit);
+        // plotLineOfBestFit(lineOfBestFit);
     } else {
         // Remove the line of best fit from the graph
         d3.select('#container svg').selectAll('.line-of-best-fit').remove();
@@ -479,22 +504,18 @@ function filterByState(state) {
         const stateFilters = filterMap.get('state');
     
         let index = stateFilters.indexOf(state);
-        if(state === 'unspecified'){
-            index = stateFilters.indexOf('unspecified')
-        }
+        // if(state === 'unspecified'){
+        //     index = stateFilters.indexOf('unspecified')
+        // }
         const button = document.getElementById('state_' + state);
         button.classList.toggle('active');
         if (index !== -1) {
             // State exists, so remove it
             stateFilters.splice(index, 1);
         } else {
-            // State doesn't exist, so add it
-            if (state === 'unspecified'){
-                stateFilters.push('')
-            }
-            else{
+           
                 stateFilters.push(state);
-            }
+            
         }
     } else {
         // 'state' key doesn't exist in filterMap
@@ -575,7 +596,7 @@ function filterByYear() {
             if (filterMap.has('sex')) {
         const sexFilters = filterMap.get('sex');
         const index = sexFilters.indexOf(gender);
-        const button = document.getElementById('gender_' + gender);
+        const button = document.getElementById('sex_' + gender);
             button.classList.toggle('active');
         if (index !== -1) {
             // Gender exists, so remove it
@@ -774,9 +795,54 @@ function hideTooltip() {
     tooltip.style.display = 'none';
 }
 
+// function turnAllFiltersOn() {
+//     let tempMap = new Map([
+//         ['age', [
+//             { minAge: 0, maxAge: 10 },
+//             { minAge: 11, maxAge: 22 },
+//             { minAge: 23, maxAge: 39 },
+//             { minAge: 40, maxAge: 100 }
+//         ]],
+//         ['state', ['NC', 'GA', 'TX', 'TN', 'LA', 'AL', 'VA', 'MS', 'MD', 'unspecified']],
+//         ['sex', ['male', 'female']]
+//         // ['year', []]
+//     ]);
+
+//     // Loop through each filter box
+//     tempMap.forEach((values, filterType) => {
+//         // For age filters, activate all buttons for each age range
+//         if (filterType === 'age') {
+//             values.forEach(value => {
+//                 let minAge = value.minAge;
+//                 let maxAge = value.maxAge;
+            
+//                 let button = document.getElementById(`age_${minAge}_${maxAge}`);
+//                 button.classList.toggle('active');
+
+
+//             });
+//         } else {
+//             // For other filters, activate all buttons in the values array
+//             values.forEach(value => {
+//                 let button = document.getElementById(`${filterType}_${value}`);
+//                 if (button) {
+//                     button.classList.toggle('active');
+//                     console.log(`Button activated: ${button.id}`);
+//                 } else {
+//                     console.warn(`Button not found: ${filterType}_${value}`);
+//                 }
+//             });
+//         }
+//     });
+//     updateData(data);
+// }
+
+
         // Read the CSV data.
         let data;
         runData();
+        // turnAllFiltersOn();
+
         // Fetch data
 function runData(){
         d3.csv("berry-data.csv").then(csvData => {
@@ -797,6 +863,8 @@ function runData(){
                  d.age = +d['age']; // Parse age field
                  d.sex = d['sex']; // Parse sex field
                 d.state = d['state']; // Parse state field
+                d.state = d.state === '' ? 'unspecified' : d.state;
+
 
 
             });
