@@ -186,11 +186,11 @@
       <div class="radio-group">
         <label>
             <input type="radio" name="filter" id="toggle1860" value="1860">
-           1860 CPI
+           Use 1860 CPI
         </label>
         <label>
             <input type="radio" name="filter" id="toggle2014" value="2014" checked>
-            2014 CPI
+            Use 2014 CPI
         </label>
     </div>
             </div>
@@ -218,19 +218,27 @@
             <p id="iqr-value">IQR: </p>
             <p id="median-value">Median: </p>
             <p id="mean-value">Mean: </p>
-            <p id="observations-value">Number of Observations: </p>
+            <!-- <p id="observations-value">Number of Observations: </p> -->
+    
             <!-- <div id="boxplot-container"></div> New container for the boxplot -->
               <!-- New checkbox input element for toggling the line of best fit -->
             </p>
         </div>
         <div class = 'filter-box'>
 
-       
-<p class = "filter-title"> Linear Regression Model </p>
+<div class = 'filter-box'>
+    <p class = "filter-title"> Linear Regression Model</p>
     <label for="toggle-line-of-best-fit">
         <input type="checkbox" id="toggle-line-of-best-fit">
         Show Line of Best Fit
     </label>
+            <p id="r-squared">R-Squared: </p>
+            <p id="slope">Slope: </p>
+            <p id="y-intercept">Y-Intercept: </p>
+        </div>
+
+       
+ 
 </div>
         </div>
     </div>
@@ -275,8 +283,10 @@ let filterMap = new Map([
     // ['year', []]
  ])
 
+ let linearToggle = false;
+
  
-let firstYear = new Date(1797, 0, 1);
+let firstYear = new Date(1814, 0, 1);
 let lastYear = new Date(1865, 0, 1);
 
 document.getElementById('start-year').value = firstYear.getFullYear();
@@ -310,11 +320,16 @@ function progressBar(dataPointsLeft){
 function calculateRegression(data) {
     // Use d3-regression to perform linear regression
     const regression = d3.regressionLinear()
-        .x(d => d.year.getFullYear() - 1797) // Use the full year as x-value
+        .x(d => d.year.getFullYear() - 1814) // Use the full year as x-value
         .y(d => d.appraisal); // Define the y value as the appraisal
 
     // Calculate the regression result using the data
     const result = regression(data);
+    document.getElementById('r-squared').innerText = `R-Squared: ${result.rSquared}`;
+    document.getElementById('slope').innerText = `Slope: ${result.a}`;
+    document.getElementById('y-intercept').innerText = `Y-Intecept: ${result.b}`;
+
+
 
     console.log('using calculateRegression() regression: ', result)
     console.log('realistic y-intercept', result.b)
@@ -323,34 +338,34 @@ function calculateRegression(data) {
     // Return the calculated line of best fit
     return result;
 }
-function calculateLineOfBestFit(data) {
-    // Calculate the mean of the x (year) and y (appraisal) values
-    const xMean = d3.mean(data, d => d.year - 1797);
-    const yMean = d3.mean(data, d => d.appraisal);
+// function calculateLineOfBestFit(data) {
+//     // Calculate the mean of the x (year) and y (appraisal) values
+//     const xMean = d3.mean(data, d => d.year - 1797);
+//     const yMean = d3.mean(data, d => d.appraisal);
 
-    // Initialize numerator and denominator for calculating the slope
-    let numerator = 0;
-    let denominator = 0;
+//     // Initialize numerator and denominator for calculating the slope
+//     let numerator = 0;
+//     let denominator = 0;
 
-    // Calculate the slope of the line (b)
-    data.forEach(d => {
-        numerator += (d.year - 1797 - xMean) * (d.appraisal - yMean);
-        denominator += (d.year - 1797 - xMean) ** 2;
-    });
+//     // Calculate the slope of the line (b)
+//     data.forEach(d => {
+//         numerator += (d.year - 1797 - xMean) * (d.appraisal - yMean);
+//         denominator += (d.year - 1797 - xMean) ** 2;
+//     });
 
-    const slope = numerator / denominator;
+//     const slope = numerator / denominator;
 
-    // Calculate the intercept (a) of the line
-    const intercept = yMean - slope * xMean;
+//     // Calculate the intercept (a) of the line
+//     const intercept = yMean - slope * xMean;
 
-    // Calculate the line of best fit points
-    const lineOfBestFit = data.map(d => ({
-        x: d.year,
-        y: slope * (d.year - 1797) + intercept,
-    }));
+//     // Calculate the line of best fit points
+//     const lineOfBestFit = data.map(d => ({
+//         x: d.year,
+//         y: slope * (d.year - 1797) + intercept,
+//     }));
 
-    return lineOfBestFit;
-}
+//     return lineOfBestFit;
+// }
 
 
 // function calcBestFit(data) {
@@ -394,7 +409,7 @@ function plotLineOfBestFit(data) {
     // Define the line generator
     const line = d3.line()
         .x(d => xScale(d.year))
-        .y(d => yScale(regressionResult.a * (d.year.getFullYear() - 1797) + regressionResult.b));
+        .y(d => yScale(regressionResult.a * (d.year.getFullYear() - 1814) + regressionResult.b));
 
     // Add the line of best fit to the graph
     svg.append('path')
@@ -407,15 +422,17 @@ function plotLineOfBestFit(data) {
 }
 
 function toggleLineOfBestFit(show) {
-    if (show) {
+    if (!linearToggle) {
         // Calculate the line of best fit using the full dataset
-         plotLineOfBestFit(bigData);
+        //  plotLineOfBestFit(bigData);
         // calculateRegression(bigData)
         // calcBestFit(bigData)
-
         // Plot the line of best fit
         // plotLineOfBestFit(lineOfBestFit);
+        linearToggle = true;
+        updateData(data)
     } else {
+        linearToggle = false;
         // Remove the line of best fit from the graph
         d3.select('#container svg').selectAll('.line-of-best-fit').remove();
     }
@@ -492,9 +509,7 @@ function calculateSummaryStatistics(filteredData) {
         range,
         iqr,
         median,
-        mean,
-        numberOfObservations
-    };
+        mean    };
 }
 
 
@@ -647,6 +662,7 @@ function updateData(filteredData) {
 
     bigData = filteredData
 
+
     svg.selectAll("*").remove();
 
 
@@ -752,7 +768,7 @@ function updateData(filteredData) {
         .remove();
 
     regressionResult = calculateRegression(filteredData)
-    const lineOfBestFit = filteredData.map(d => [d.year, regressionResult.a * (d.year.getFullYear() - 1797) + regressionResult.b]);
+    const lineOfBestFit = filteredData.map(d => [d.year, regressionResult.a * (d.year.getFullYear() - 1814) + regressionResult.b]);
 
     // Define the line generator
     const line = d3.line()
@@ -760,13 +776,21 @@ function updateData(filteredData) {
         .y(d => y(d[1]));
 
     // Add the line of best fit to the chart
-    chart.append('path')
+
+    if(linearToggle){
+        chart.append('path')
         .datum(lineOfBestFit)
         .attr('class', 'line-of-best-fit')
         .attr('d', line)
         .attr('stroke', 'red')
         .attr('stroke-width', 2)
         .attr('fill', 'none');
+    }
+    else{
+        d3.select('#container svg').selectAll('.line-of-best-fit').remove();
+    }
+
+    
 
 
     progressBar(filteredData.length);
@@ -782,7 +806,7 @@ function updateStatisticsDisplay(stats) {
     document.getElementById('iqr-value').innerText = `IQR: ${stats.iqr}`;
     document.getElementById('median-value').innerText = `Median: ${stats.median}`;
     document.getElementById('mean-value').innerText = `Mean: ${stats.mean}`;
-    document.getElementById('observations-value').innerText = `Number of Observations: ${stats.numberOfObservations}`;
+    // document.getElementById('observations-value').innerText = `Number of Observations: ${stats.numberOfObservations}`;
 }
 
 
