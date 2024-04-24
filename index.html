@@ -235,9 +235,10 @@
         <input type="checkbox" id="toggle-line-of-best-fit">
         Show Line of Best Fit
     </label>
-            <p id="r-squared">R-Squared: </p>
             <p id="slope">Slope: </p>
             <p id="y-intercept">Y-Intercept: </p>
+            <p id="r-squared">R-Squared: </p>
+
         </div>
 
        
@@ -327,10 +328,15 @@ function calculateRegression(data) {
 
     // Calculate the regression result using the data
     const result = regression(data);
-    document.getElementById('r-squared').innerText = `R-Squared: ${result.rSquared}`;
-    document.getElementById('slope').innerText = `Slope: ${result.a}`;
-    document.getElementById('y-intercept').innerText = `Y-Intercept: ${result.b}`;
 
+    const roundedRSquared = result.rSquared.toFixed(3);
+// Round slope to three decimal places
+const roundedSlope = result.a.toFixed(3);
+// Round y-intercept to three decimal places
+const roundedYIntercept = result.b.toFixed(3);
+document.getElementById('r-squared').innerText = `R-Squared: ${roundedRSquared}`;
+document.getElementById('slope').innerText = `Slope: ${roundedSlope}`;
+document.getElementById('y-intercept').innerText = `Y-Intercept: ${roundedYIntercept}`;
 
 
     console.log('using calculateRegression() regression: ', result)
@@ -597,6 +603,7 @@ function filterByYear() {
 
 function updateData(filteredData) {
     // toggleLineOfBestFit(false)
+    console.log('current filter map:', filterMap)
     //this will filter out all the data points that have an unspecified appraisal!!!
     filteredData = filteredData.filter(d => d.appraisal);
     filteredData = filteredData.filter(d => filterMap.get('sex').includes(d.sex));
@@ -756,14 +763,19 @@ function updateData(filteredData) {
 
 // Function to update the statistics display
 function updateStatisticsDisplay(stats) {
-    // Assuming you have HTML elements to display the statistics
-    document.getElementById('range-value').innerText = `Range: ${stats.range}`;
-    document.getElementById('iqr-value').innerText = `IQR: ${stats.iqr}`;
-    document.getElementById('median-value').innerText = `Median: ${stats.median}`;
-    document.getElementById('mean-value').innerText = `Mean: ${stats.mean}`;
+    // Round the statistics values to three decimal places
+    const roundedRange = stats.range.toFixed(3);
+    const roundedIQR = stats.iqr.toFixed(3);
+    const roundedMedian = stats.median.toFixed(3);
+    const roundedMean = stats.mean.toFixed(3);
+
+    // Update HTML elements with rounded values
+    document.getElementById('range-value').innerText = `Range: ${roundedRange}`;
+    document.getElementById('iqr-value').innerText = `IQR: ${roundedIQR}`;
+    document.getElementById('median-value').innerText = `Median: ${roundedMedian}`;
+    document.getElementById('mean-value').innerText = `Mean: ${roundedMean}`;
     // document.getElementById('observations-value').innerText = `Number of Observations: ${stats.numberOfObservations}`;
 }
-
 
         function showTooltip(data) {
     const tooltip = document.getElementById('tooltip');
@@ -795,53 +807,54 @@ function hideTooltip() {
     tooltip.style.display = 'none';
 }
 
-// function turnAllFiltersOn() {
-//     let tempMap = new Map([
-//         ['age', [
-//             { minAge: 0, maxAge: 10 },
-//             { minAge: 11, maxAge: 22 },
-//             { minAge: 23, maxAge: 39 },
-//             { minAge: 40, maxAge: 100 }
-//         ]],
-//         ['state', ['NC', 'GA', 'TX', 'TN', 'LA', 'AL', 'VA', 'MS', 'MD', 'unspecified']],
-//         ['sex', ['male', 'female']]
-//         // ['year', []]
-//     ]);
+function turnAllFiltersOn() {
+    let tempMap = new Map([
+        ['age', [
+            { minAge: 0, maxAge: 10 },
+            { minAge: 11, maxAge: 22 },
+            { minAge: 23, maxAge: 39 },
+            { minAge: 40, maxAge: 100 }
+        ]],
+        ['state', ['NC', 'GA', 'TX', 'TN', 'LA', 'AL', 'VA', 'MS', 'MD', 'unspecified']],
+        ['sex', ['male', 'female']]
+        // ['year', []]
+    ]);
 
-//     // Loop through each filter box
-//     tempMap.forEach((values, filterType) => {
-//         // For age filters, activate all buttons for each age range
-//         if (filterType === 'age') {
-//             values.forEach(value => {
-//                 let minAge = value.minAge;
-//                 let maxAge = value.maxAge;
+    filterMap = tempMap
+    // Loop through each filter box
+    tempMap.forEach((values, filterType) => {
+        // For age filters, activate all buttons for each age range
+        if (filterType === 'age') {
+            values.forEach(value => {
+                let minAge = value.minAge;
+                let maxAge = value.maxAge;
             
-//                 let button = document.getElementById(`age_${minAge}_${maxAge}`);
-//                 button.classList.toggle('active');
+                let button = document.getElementById(`age_${minAge}_${maxAge}`);
+                button.classList.toggle('active');
 
 
-//             });
-//         } else {
-//             // For other filters, activate all buttons in the values array
-//             values.forEach(value => {
-//                 let button = document.getElementById(`${filterType}_${value}`);
-//                 if (button) {
-//                     button.classList.toggle('active');
-//                     console.log(`Button activated: ${button.id}`);
-//                 } else {
-//                     console.warn(`Button not found: ${filterType}_${value}`);
-//                 }
-//             });
-//         }
-//     });
-//     updateData(data);
-// }
+            });
+        } else {
+            // For other filters, activate all buttons in the values array
+            values.forEach(value => {
+                let button = document.getElementById(`${filterType}_${value}`);
+                if (button) {
+                    button.classList.toggle('active');
+                    console.log(`Button activated: ${button.id}`);
+                } else {
+                    console.warn(`Button not found: ${filterType}_${value}`);
+                }
+            });
+        }
+    });
+    updateData(data);
+}
 
 
         // Read the CSV data.
         let data;
         runData();
-        // turnAllFiltersOn();
+        turnAllFiltersOn();
 
         // Fetch data
 function runData(){
