@@ -638,6 +638,7 @@ function updateData(filteredData) {
 
     // Calculate summary statistics for the filtered data
     const stats = calculateSummaryStatistics(filteredData);
+    // console.log('current stats', stats)
     // Display the calculated statistics
     updateStatisticsDisplay(stats);
 
@@ -763,17 +764,28 @@ function updateData(filteredData) {
 
 // Function to update the statistics display
 function updateStatisticsDisplay(stats) {
-    // Round the statistics values to three decimal places
-    const roundedRange = stats.range.toFixed(3);
-    const roundedIQR = stats.iqr.toFixed(3);
-    const roundedMedian = stats.median.toFixed(3);
-    const roundedMean = stats.mean.toFixed(3);
-
-    // Update HTML elements with rounded values
-    document.getElementById('range-value').innerText = `Range: ${roundedRange}`;
+    // console.log('whats happenin here', stats)
+    // if((data.length==0)){
+    //  document.getElementById('range-value').innerText = `No Value`;
+    // document.getElementById('iqr-value').innerText = `No Value`;
+    // document.getElementById('median-value').innerText = `No Value`;
+    // document.getElementById('mean-value').innerText = `No Value`;
+    // }
+    // else 
+    // {
+            // Round the statistics values to three decimal places
+    const roundedRange = stats.range;
+    const roundedIQR = stats.iqr;
+    const roundedMedian = stats.median;
+    const roundedMean = stats.mean;
+   // Update HTML elements with rounded values
+   document.getElementById('range-value').innerText = `Range: ${roundedRange}`;
     document.getElementById('iqr-value').innerText = `IQR: ${roundedIQR}`;
     document.getElementById('median-value').innerText = `Median: ${roundedMedian}`;
     document.getElementById('mean-value').innerText = `Mean: ${roundedMean}`;
+    
+
+
     // document.getElementById('observations-value').innerText = `Number of Observations: ${stats.numberOfObservations}`;
 }
 
