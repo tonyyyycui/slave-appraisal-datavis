@@ -13,7 +13,7 @@
             border: 1px solid black;
             padding: 5px;
             display: none;
-            font-size: 12px;
+            font-size: 15px;
         }
 
         /* Styling for title boxes */
@@ -112,6 +112,28 @@
 #container {
     background-color: #f2e4f2; /* Sets the background color to light blue */
 }
+
+.info-icon {
+    display: inline-block;
+    margin-left: 5px;
+    cursor: pointer;
+}
+
+/* Styling for the info message container */
+.info-message {
+    position: absolute;
+    background-color: white;
+    border: 1px solid black;
+    padding: 10px;
+    display: none;
+    font-size: 12px;
+    z-index: 1; /* Ensure the message appears on top of other elements */
+}
+
+/* Show the info message when hovering over the info icon */
+.info-icon:hover + .info-message {
+    display: block;
+}
         
     </style>
 </head>
@@ -181,6 +203,11 @@
 
             <div class = "filter-box">
                 <p class="filter-title" style="font-weight: bold;">Use Different CPI's</p>
+                <div class="info-icon" id="info-icon">&#9432;</div>
+    <!-- Message container -->
+    <div class="info-message" id="info-message">
+        <p>This option allows you to switch between different Consumer Price Index (CPI) values. <br>You may see changes on the appraisal values (Y-axis).</p>
+    </div>
 
                    <!-- Either-Or Toggle Switch (Radio Buttons) -->
       <div class="radio-group">
@@ -196,6 +223,8 @@
 
             </div>
             <div class="tooltip" id="tooltip"></div>
+            <div class = "tooltip" id= "info_tooltip"></div>
+
 
         </div>
 
@@ -229,17 +258,24 @@
         </div>
         <div class = 'filter-box'>
 
-<div class = 'filter-box'>
-    <p class = "filter-title"> Linear Regression Model</p>
-    <label for="toggle-line-of-best-fit">
-        <input type="checkbox" id="toggle-line-of-best-fit">
-        Show Line of Best Fit
-    </label>
-            <p id="slope">Slope: </p>
-            <p id="y-intercept">Y-Intercept: </p>
-            <p id="r-squared">R-Squared: </p>
-
-        </div>
+            <div class="filter-box">
+                <p class="filter-title">Linear Regression Model</p>
+                <!-- Info icon -->
+                <label for="toggle-line-of-best-fit">
+                    <input type="checkbox" id="toggle-line-of-best-fit">
+                    Show Line of Best Fit
+                </label>
+                <div> Appraisal = β<sub>0</sub> + β<sub>1</sub> * Years Since 1814 
+                    <div class="info-icon" id="info-icon-line-of-best-fit">&#9432;</div>
+                    <!-- Message container -->
+                    <div class="info-message" id="info-message-line-of-best-fit">
+                        <p>This linear regression models X as the number of years since 1814, Y as the slave appraisal value, and β<sub>1</sub> as the expected change in slave appraisal value for each year after 1814.</p>
+                    </div>
+                </div>
+                <p id="slope">Slope (β<sub>1</sub>): </p>
+                <p id="y-intercept">Y-Intercept (β<sub>0</sub>): </p>
+                <p id="r-squared">R-Squared: </p>
+            </div>
 
        
  
@@ -335,8 +371,8 @@ const roundedSlope = result.a.toFixed(3);
 // Round y-intercept to three decimal places
 const roundedYIntercept = result.b.toFixed(3);
 document.getElementById('r-squared').innerText = `R-Squared: ${roundedRSquared}`;
-document.getElementById('slope').innerText = `Slope: ${roundedSlope}`;
-document.getElementById('y-intercept').innerText = `Y-Intercept: ${roundedYIntercept}`;
+document.getElementById('slope').innerHTML = `Slope (&beta;<sub>1</sub>): ${roundedSlope}`;
+document.getElementById('y-intercept').innerHTML = `Y-Intercept (&beta;<sub>0</sub>): ${roundedYIntercept}`;
 
 
     console.log('using calculateRegression() regression: ', result)
@@ -688,7 +724,7 @@ function updateData(filteredData) {
         .attr("transform", "rotate(-90)")
         .attr("x", -chartHeight / 2)
         .attr("y", -60)
-        .text("CPI");
+        .text("Slave Appraisal (Dollars)");
 
     // Bind the filtered data
     const circles = chart.selectAll("circle")
@@ -798,6 +834,7 @@ function updateStatisticsDisplay(stats) {
     const year = date.getFullYear();
 
     const cpiValue = boolCPI ? data['app.cpi.2014'] : data['app.cpi.1860'];
+    // cpiValue = cpiValue.toFixed(2); // Rounds to 2 decimal places
 
 
  tooltip.innerHTML = `
@@ -882,6 +919,7 @@ function runData(){
                     d.appraisal = +d['app.cpi.1860'];
 
                 }
+                
 
                 // d.appraisal1860 = +d['app.cpi.1860'];
                 d.name = d['name']; // Parse name field
