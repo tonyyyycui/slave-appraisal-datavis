@@ -329,7 +329,7 @@ function calculateRegression(data) {
     const result = regression(data);
     document.getElementById('r-squared').innerText = `R-Squared: ${result.rSquared}`;
     document.getElementById('slope').innerText = `Slope: ${result.a}`;
-    document.getElementById('y-intercept').innerText = `Y-Intecept: ${result.b}`;
+    document.getElementById('y-intercept').innerText = `Y-Intercept: ${result.b}`;
 
 
 
@@ -340,57 +340,7 @@ function calculateRegression(data) {
     // Return the calculated line of best fit
     return result;
 }
-// function calculateLineOfBestFit(data) {
-//     // Calculate the mean of the x (year) and y (appraisal) values
-//     const xMean = d3.mean(data, d => d.year - 1797);
-//     const yMean = d3.mean(data, d => d.appraisal);
 
-//     // Initialize numerator and denominator for calculating the slope
-//     let numerator = 0;
-//     let denominator = 0;
-
-//     // Calculate the slope of the line (b)
-//     data.forEach(d => {
-//         numerator += (d.year - 1797 - xMean) * (d.appraisal - yMean);
-//         denominator += (d.year - 1797 - xMean) ** 2;
-//     });
-
-//     const slope = numerator / denominator;
-
-//     // Calculate the intercept (a) of the line
-//     const intercept = yMean - slope * xMean;
-
-//     // Calculate the line of best fit points
-//     const lineOfBestFit = data.map(d => ({
-//         x: d.year,
-//         y: slope * (d.year - 1797) + intercept,
-//     }));
-
-//     return lineOfBestFit;
-// }
-
-
-// function calcBestFit(data) {
-//     // Extract years and appraisals from the data
-//     const xyData = data.map(d => [d.year - 1797, d.appraisal]);
-
-//     // Perform linear regression using regression-js
-//     const result = regression.linear(xyData);
-
-//     // Get slope and intercept
-//     const slope = result.equation[0];
-//     const intercept = result.equation[1];
-
-//     // Calculate the line of best fit points
-//     const lineOfBestFit = data.map(d => ({
-//         x: d.year,
-//         y: slope * (d.year - 1797) + intercept,
-//     }));
-//     console.log(' this also better be right. slope:', slope, intercept)
-//     console.log('this better be right. line:', lineOfBestFit
-//     )
-//     return lineOfBestFit;
-// }
 
 function plotLineOfBestFit(data) {
     // Calculate regression result
@@ -659,6 +609,9 @@ function updateData(filteredData) {
             // Check if the age falls within any of the selected age ranges
             return ageFilters.some(range => d.age >= range.minAge && d.age <= range.maxAge);
         });
+    }
+    else{
+        filteredData = []
     }
     // console.log('this is yo map', map.sex)
 
