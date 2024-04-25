@@ -250,6 +250,8 @@
             <p id="iqr-value">IQR: </p>
             <p id="median-value">Median: </p>
             <p id="mean-value">Mean: </p>
+            <p id="sd-value">Standard Deviation: </p>
+
             <!-- <p id="observations-value">Number of Observations: </p> -->
     
             <!-- <div id="boxplot-container"></div> New container for the boxplot -->
@@ -494,18 +496,23 @@ function calculateSummaryStatistics(filteredData) {
         // Calculate mean
         const mean = Math.round(d3.mean(filteredData, d => d.appraisal) * 1000) / 1000; // Round to the nearest thousandth
         
+        // Calculate standard deviation
+        const sd = Math.round(d3.deviation(filteredData, d => d.appraisal) * 1000) / 1000; // Round to the nearest thousandth
+        
         return {
             range,
             iqr,
             median,
-            mean
+            mean,
+            sd
         };
     } else {
         return {
             range: 0,
             iqr: 0,
             median: 0,
-            mean: 0
+            mean: 0,
+            sd: 0
         };
     }
 }
@@ -818,11 +825,14 @@ function updateStatisticsDisplay(stats) {
     const roundedIQR = stats.iqr;
     const roundedMedian = stats.median;
     const roundedMean = stats.mean;
+    const roundedSd = stats.sd;
    // Update HTML elements with rounded values
    document.getElementById('range-value').innerText = `Range: ${roundedRange}`;
     document.getElementById('iqr-value').innerText = `IQR: ${roundedIQR}`;
     document.getElementById('median-value').innerText = `Median: ${roundedMedian}`;
     document.getElementById('mean-value').innerText = `Mean: ${roundedMean}`;
+    document.getElementById('sd-value').innerText = `Standard Deviation: ${roundedSd}`;
+
     
 
 
