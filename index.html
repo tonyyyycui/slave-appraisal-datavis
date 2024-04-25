@@ -256,30 +256,28 @@
               <!-- New checkbox input element for toggling the line of best fit -->
             </p>
         </div>
-        <div class = 'filter-box'>
-
-            <div class="filter-box">
-                <p class="filter-title">Linear Regression Model</p>
-                <!-- Info icon -->
-                <label for="toggle-line-of-best-fit">
-                    <input type="checkbox" id="toggle-line-of-best-fit">
-                    Show Line of Best Fit
-                </label>
-                <div> Appraisal = β<sub>0</sub> + β<sub>1</sub> * Years Since 1814 
-                    <div class="info-icon" id="info-icon-line-of-best-fit">&#9432;</div>
-                    <!-- Message container -->
-                    <div class="info-message" id="info-message-line-of-best-fit">
-                        <p>This linear regression models X as the number of years since 1814, Y as the slave appraisal value, and β<sub>1</sub> as the expected change in slave appraisal value for each year after 1814.</p>
-                    </div>
-                </div>
-                <p id="slope">Slope (β<sub>1</sub>): </p>
-                <p id="y-intercept">Y-Intercept (β<sub>0</sub>): </p>
-                <p id="r-squared">R-Squared: </p>
+        <div class="filter-box">
+            <p class="filter-title">Linear Regression Model</p>
+            <!-- Info icon -->
+            <div class="info-icon" id="info-icon-line-of-best-fit">&#9432;</div>
+            <div class="info-message" id="info-message-line-of-best-fit">
+                <p>This linear regression models X as the number of years since 1814, Y as the slave appraisal value, and β<sub>1</sub> as the expected change in slave appraisal value for each year after 1814.</p>
             </div>
-
+            <label for="toggle-line-of-best-fit">
+                <input type="checkbox" id="toggle-line-of-best-fit">
+                Show Line of Best Fit
+            </label>
+            <!-- Message container -->
+           
+        
+            <div> Appraisal = β<sub>0</sub> + β<sub>1</sub> * Years Since 1814 
+            </div>
+            <p id="slope">Slope (β<sub>1</sub>): </p>
+            <p id="y-intercept">Y-Intercept (β<sub>0</sub>): </p>
+            <p id="r-squared">R-Squared: </p>
+        </div>
        
  
-</div>
         </div>
     </div>
 
@@ -478,32 +476,38 @@ function applyCPIFilter(year) {
     // Update your visualization with the filteredData
     updateData(filteredData);
 }
-
 function calculateSummaryStatistics(filteredData) {
-    // Calculate range
-    const minValue = d3.min(filteredData, d => d.appraisal);
-    const maxValue = d3.max(filteredData, d => d.appraisal);
-    const range = maxValue - minValue;
-    
-    // Calculate IQR (interquartile range)
-    const q1 = d3.quantile(filteredData.map(d => d.appraisal).sort(d3.ascending), 0.25);
-    const q3 = d3.quantile(filteredData.map(d => d.appraisal).sort(d3.ascending), 0.75);
-    const iqr = q3 - q1;
-    
-    // Calculate median
-    const median = d3.median(filteredData, d => d.appraisal);
-    
-    // Calculate mean
-    const mean = d3.mean(filteredData, d => d.appraisal);
-    
-    // Calculate number of observations
-    const numberOfObservations = filteredData.length;
-    
-    return {
-        range,
-        iqr,
-        median,
-        mean    };
+    if (filteredData.length > 0) {
+        // Calculate range
+        const minValue = d3.min(filteredData, d => d.appraisal);
+        const maxValue = d3.max(filteredData, d => d.appraisal);
+        const range = Math.round((maxValue - minValue) * 1000) / 1000; // Round to the nearest thousandth
+        
+        // Calculate IQR (interquartile range)
+        const q1 = d3.quantile(filteredData.map(d => d.appraisal).sort(d3.ascending), 0.25);
+        const q3 = d3.quantile(filteredData.map(d => d.appraisal).sort(d3.ascending), 0.75);
+        const iqr = Math.round((q3 - q1) * 1000) / 1000; // Round to the nearest thousandth
+        
+        // Calculate median
+        const median = Math.round(d3.median(filteredData, d => d.appraisal) * 1000) / 1000; // Round to the nearest thousandth
+        
+        // Calculate mean
+        const mean = Math.round(d3.mean(filteredData, d => d.appraisal) * 1000) / 1000; // Round to the nearest thousandth
+        
+        return {
+            range,
+            iqr,
+            median,
+            mean
+        };
+    } else {
+        return {
+            range: 0,
+            iqr: 0,
+            median: 0,
+            mean: 0
+        };
+    }
 }
 
 
